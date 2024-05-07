@@ -42,7 +42,9 @@ export default function HomePage() {
                     <CirclePlus className="h-4 w-4" />
                 </button>
             </header>
-            <main className="py-2 px-4">HOME PAGE</main>
+            <main className="py-2 px-4">
+                
+            </main>
         </>
     )
 }
