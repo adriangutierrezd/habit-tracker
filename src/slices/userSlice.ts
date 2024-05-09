@@ -4,6 +4,7 @@ import { UserSession } from '../types';
 const defaultInitialState : UserSession = {
   token: null,
   user: null,
+  isLogged: false
 };
 
 const getInitialState = (): UserSession => {
@@ -17,6 +18,7 @@ const getInitialState = (): UserSession => {
 
   return {
     token: token,
+    isLogged: true,
     user: {
         id: userData.id,
         name: userData.name,
@@ -35,12 +37,14 @@ export const userSlice = createSlice({
         const { user, token } = defaultInitialState
         state.user = user
         state.token = token
+        state.isLogged = false
     },
     login: (state, data) => {
         const { payload } = data
         window.localStorage.setItem('userSession', JSON.stringify(payload))
         state.user = payload.user
         state.token = payload.token
+        state.isLogged = true
     },
   },
 });

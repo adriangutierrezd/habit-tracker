@@ -2,6 +2,9 @@ import { useState } from "react";
 import { AVAILABLE_COLORS, HABIT_FREQUENCY } from "../constants";
 import { BasicOption } from "../types";
 import { CirclePlus, Minus, Plus } from "lucide-react";
+import { useSelector } from "react-redux";
+import { RootState } from "../store";
+import { v4 as uuidv4 } from 'uuid';
 
 const MODAL_ID = 'HabbitModal'
 
@@ -10,7 +13,7 @@ export default function HabbitModal() {
 
     const [habbitName, setHabbitName] = useState<string>('')
     const [habbitDescription, setHabbitDescription] = useState<string>('')
-    const [habitFrequency, setHabitFrequency] = useState<string>()
+    const [habbitFrequency, setHabbitFrequency] = useState<string>()
     const [habbitColor, setHabbitColor] = useState<string>('')
     const [habbitMaxReps, setHabbitMaxReps] = useState<number>(1)
     const [habbitNameError, setHabbitNameError] = useState<string>()
@@ -18,6 +21,9 @@ export default function HabbitModal() {
     const [habbitColorError, setHabbitColorError] = useState<string>()
     const [habbitMaxRepsError, setHabbitMaxRepsError] = useState<string>()
     const [habbitFrequencyError, setHabbitFrequencyError] = useState<string>('')
+    const { isLogged } = useSelector((state: RootState) => {
+        return state.userSession
+    });
 
 
     const handleChangeModalStatus = (status: boolean) => {
@@ -55,7 +61,7 @@ export default function HabbitModal() {
     const resetFields = () => {
         setHabbitName('')
         setHabbitDescription('')
-        setHabitFrequency('')
+        setHabbitFrequency('')
         setHabbitColor('')
         setHabbitMaxReps(1)
     }
@@ -85,7 +91,7 @@ export default function HabbitModal() {
                 setHabbitColorError('El color es obligatorio')
             }
 
-            if(!habitFrequency){
+            if(!habbitFrequency){
                 hasErrors = true
                 setHabbitFrequencyError('Debes seleccionar una periodicidad')
             }
@@ -99,7 +105,27 @@ export default function HabbitModal() {
                 return
             }
 
-            console.log('NO erros')
+            if(isLogged){
+                // TODO
+            }else{
+                const habbitData = {
+                    id: uuidv4(),
+                    name: habbitName,
+                    description: habbitDescription,
+                    color: habbitColor,
+                    maxRepetitions: habbitMaxReps,
+                    frequency: habbitFrequency
+                }
+
+                const localHabbits = window.localStorage.getItem('habbits')
+                if(!localHabbits){
+                    window.localStorage.setItem('habbits', JSON.stringify([habbitData]))
+                }else{
+                    const dataHabbits = JSON.parse(localHabbits)
+                    window.localStorage.setItem('habbits', JSON.stringify([...dataHabbits, habbitData]))
+                }
+
+            }
 
             return
         }catch(error){
@@ -126,12 +152,12 @@ export default function HabbitModal() {
                         <span className="text-sm text-red-500">{habbitDescriptionError}</span>
 
                         <select defaultValue="0" className="select select-bordered w-full" onChange={(event) => {
-                            setHabitFrequency(event.target.value)
+                            setHabbitFrequency(event.target.value)
                         }}>
                             <option disabled value="0">Periodicidad</option>
-                            {HABIT_FREQUENCY.map((habitFrequency: BasicOption) => {
-                                return <option key={habitFrequency.value} value={habitFrequency.value}>
-                                    {habitFrequency.label}
+                            {HABIT_FREQUENCY.map((habbitFrequency: BasicOption) => {
+                                return <option key={habbitFrequency.value} value={habbitFrequency.value}>
+                                    {habbitFrequency.label}
                                 </option>
                             })}
                         </select>
@@ -148,7 +174,7 @@ export default function HabbitModal() {
                         <span className="text-sm text-red-500">{habbitColorError}</span>
 
 
-                        <label htmlFor="maxReps" className="block">Máximas veces completado {habitFrequency && <span className="lowercase">por {HABIT_FREQUENCY.find((habbit) => habbit.value === habitFrequency)?.label}</span>}</label>
+                        <label htmlFor="maxReps" className="block">Máximas veces completado {habbitFrequency && <span className="lowercase">por {HABIT_FREQUENCY.find((habbit) => habbit.value === habbitFrequency)?.label}</span>}</label>
                         <div className="flex items-center space-x-2">
                             <input disabled={true} type="number" step="1" min="1" value={habbitMaxReps} name="maxReps" className="input input-bordered flex-1" />
                             <button onClick={() => {

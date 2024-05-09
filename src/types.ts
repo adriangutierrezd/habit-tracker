@@ -7,6 +7,7 @@ export interface UserData {
 export interface UserSession {
     token: string | null;
     user: UserData | null;
+    isLogged: boolean
 }
 
 export interface BasicOption {
