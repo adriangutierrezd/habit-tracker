@@ -1,7 +1,7 @@
 import { BasicOption } from "./types";
 
 export const HABIT_FREQUENCY: BasicOption[] = [
-    { label: 'Diario', value: 'DAY' },
+    { label: 'Día', value: 'DAY' },
     { label: 'Semana', value: 'WEEK' },
     { label: 'Mes', value: 'MONTH' },
     { label: 'Quincena', value: 'FORTNIGHT' },

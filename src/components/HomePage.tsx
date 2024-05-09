@@ -1,8 +1,7 @@
-import { Check, CirclePlus, HeartPulse, Settings } from "lucide-react";
+import { Check, HeartPulse, Settings } from "lucide-react";
 import { useEffect } from "react";
 import { themeChange } from 'theme-change'
-import { AVAILABLE_COLORS, HABIT_FREQUENCY } from "../constants";
-import { BasicOption } from "../types";
+import HabbitModal from "./HabbitModal";
 
 export default function HomePage() {
 
@@ -26,8 +25,8 @@ export default function HomePage() {
                                 <header className="font-semibold text-lg mb-3">Ajustes</header>
                                 <ul>
                                     <li>
-                                        <select data-choose-theme className="select select-ghost w-full max-w-xs">
-                                            <option disabled selected>Tema de la app</option>
+                                        <select defaultValue="0" data-choose-theme className="select select-ghost w-full max-w-xs">
+                                            <option disabled value="0">Tema de la app</option>
                                             <option value="light">Claro</option>
                                             <option value="dark">Oscuro</option>
                                             <option value="forest">Bosque</option>
@@ -41,36 +40,7 @@ export default function HomePage() {
                     </div>
                     <p className="flex-1">Habit Tracker</p>
                 </div>
-                <button className="btn" onClick={() => document.getElementById('my_modal_2').showModal()}>
-                    <CirclePlus className="h-4 w-4" />
-                </button>
-                <dialog id="my_modal_2" className="modal">
-                    <div className="modal-box">
-                        <h3 className="font-bold text-lg">Nuevo hábito</h3>
-                        <form className="my-3 space-y-3">
-                            <input type="text" placeholder="Nombre del hábito" className="input input-bordered w-full" />
-                            <textarea className="textarea textarea-bordered w-full" placeholder="Descripción"></textarea>
-                            <select className="select select-bordered w-full">
-                                <option disabled selected>Periodicidad</option>
-                                {HABIT_FREQUENCY.map((habitFrequency: BasicOption) => {
-                                    return <option key={habitFrequency.value} value={habitFrequency.value}>
-                                        {habitFrequency.label}
-                                    </option>
-                                })}
-                            </select>
-
-                            <div className="flex items-center spacex-2">
-                                {AVAILABLE_COLORS.map((color) => {
-                                    return <input key={color} type="radio" name="color" className="radio mr-2" checked style={{ backgroundColor: color }} />
-                                })}
-                            </div>
-
-                        </form>
-                    </div>
-                    <form method="dialog" className="modal-backdrop">
-                        <button>close</button>
-                    </form>
-                </dialog>
+                <HabbitModal />
             </header>
             <main className="py-2 px-4">
                 <div className="card w-full bg-base-100 shadow-xl">
