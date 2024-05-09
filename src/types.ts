@@ -8,3 +8,8 @@ export interface UserSession {
     token: string | null;
     user: UserData | null;
 }
+
+export interface BasicOption {
+    label: string;
+    value: string;
+}
