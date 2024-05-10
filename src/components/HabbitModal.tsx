@@ -1,19 +1,23 @@
 import { useState } from "react";
 import { AVAILABLE_COLORS, HABIT_FREQUENCY } from "../constants";
-import { BasicOption } from "../types";
+import { BasicOption, Habbit, HabbitFrequencies } from "../types";
 import { CirclePlus, Minus, Plus } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "../store";
-import { v4 as uuidv4 } from 'uuid';
+import { storeLocalHabbit } from "../services/habbitsService";
 
 const MODAL_ID = 'HabbitModal'
 
 
-export default function HabbitModal() {
+interface Props {
+    readonly handleAddHabbit: (data: Habbit) => void
+}
+
+export default function HabbitModal({handleAddHabbit}: Props) {
 
     const [habbitName, setHabbitName] = useState<string>('')
     const [habbitDescription, setHabbitDescription] = useState<string>('')
-    const [habbitFrequency, setHabbitFrequency] = useState<string>()
+    const [habbitFrequency, setHabbitFrequency] = useState<HabbitFrequencies>()
     const [habbitColor, setHabbitColor] = useState<string>('')
     const [habbitMaxReps, setHabbitMaxReps] = useState<number>(1)
     const [habbitNameError, setHabbitNameError] = useState<string>()
@@ -108,26 +112,19 @@ export default function HabbitModal() {
             if(isLogged){
                 // TODO
             }else{
-                const habbitData = {
-                    id: uuidv4(),
+                const response = storeLocalHabbit({
                     name: habbitName,
                     description: habbitDescription,
                     color: habbitColor,
                     maxRepetitions: habbitMaxReps,
-                    frequency: habbitFrequency
+                    frequency: habbitFrequency ?? 'DAY'
+                })
+                if(response.status === 201){
+                    handleAddHabbit(response.data)
                 }
-
-                const localHabbits = window.localStorage.getItem('habbits')
-                if(!localHabbits){
-                    window.localStorage.setItem('habbits', JSON.stringify([habbitData]))
-                }else{
-                    const dataHabbits = JSON.parse(localHabbits)
-                    window.localStorage.setItem('habbits', JSON.stringify([...dataHabbits, habbitData]))
-                }
-
             }
 
-            return
+            handleChangeModalStatus(false)
         }catch(error){
             // TODO
         }

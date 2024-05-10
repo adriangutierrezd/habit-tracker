@@ -1,7 +1,9 @@
 import { Check, HeartPulse, Settings } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { themeChange } from 'theme-change'
 import HabbitModal from "./HabbitModal";
+import { getLocalHabbits } from "../services/habbitsService";
+import { Habbit } from "../types";
 
 export default function HomePage() {
 
@@ -9,6 +11,11 @@ export default function HomePage() {
         themeChange(false)
     }, [])
 
+    const [habbits, setHabbits] = useState<Array<Habbit>>(getLocalHabbits().data)
+
+    const handleAddHabbit = (data: Habbit) => {
+        setHabbits([...habbits, data])
+    }
 
     return (
         <>
@@ -40,24 +47,28 @@ export default function HomePage() {
                     </div>
                     <p className="flex-1">Habit Tracker</p>
                 </div>
-                <HabbitModal />
+                <HabbitModal handleAddHabbit={handleAddHabbit} />
             </header>
             <main className="py-2 px-4">
-                <div className="card w-full bg-base-100 shadow-xl">
-                    <div className="card-body">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                                <div className="p-2 bg-accent">
-                                    <HeartPulse className="h-4 w-4" />
+                {habbits.map((habbit: Habbit) => {
+                    return (
+                        <div key={habbit.id} className="card w-full bg-base-100 shadow-xl my-3">
+                            <div className="card-body">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-3">
+                                        <div className="p-2" style={{backgroundColor: habbit.color}}>
+                                            <HeartPulse className="h-4 w-4 text-white" />
+                                        </div>
+                                        <h2 className="card-title">{habbit.name}</h2>
+                                    </div>
+                                    <button className="btn btn-secondary">
+                                        <Check className="w-4 h-4" />
+                                    </button>
                                 </div>
-                                <h2 className="card-title">Shoes!</h2>
                             </div>
-                            <button className="btn btn-secondary">
-                                <Check className="w-4 h-4" />
-                            </button>
                         </div>
-                    </div>
-                </div>
+                    )
+                })}
             </main>
         </>
     )
