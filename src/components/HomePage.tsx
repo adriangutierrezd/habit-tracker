@@ -1,9 +1,10 @@
-import { Check, HeartPulse, Settings } from "lucide-react";
+import { Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { themeChange } from 'theme-change'
 import HabbitModal from "./HabbitModal";
 import { getLocalHabbits } from "../services/habbitsService";
 import { Habbit } from "../types";
+import HabbitList from "./HabbitList";
 
 export default function HomePage() {
 
@@ -50,25 +51,7 @@ export default function HomePage() {
                 <HabbitModal handleAddHabbit={handleAddHabbit} />
             </header>
             <main className="py-2 px-4">
-                {habbits.map((habbit: Habbit) => {
-                    return (
-                        <div key={habbit.id} className="card w-full bg-base-100 shadow-xl my-3">
-                            <div className="card-body">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center space-x-3">
-                                        <div className="p-2" style={{backgroundColor: habbit.color}}>
-                                            <HeartPulse className="h-4 w-4 text-white" />
-                                        </div>
-                                        <h2 className="card-title">{habbit.name}</h2>
-                                    </div>
-                                    <button className="btn btn-secondary">
-                                        <Check className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )
-                })}
+                <HabbitList habbits={habbits} />
             </main>
         </>
     )
