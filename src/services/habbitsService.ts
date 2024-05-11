@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Habbit, HabbitFrequencies } from '../types';
-import { HTTP_CREATED_CODE, HTTP_CREATED_MSG, HTTP_DELETED_MSG, HTTP_FETCHED_MSG, HTTP_NOT_FOUND_CODE, HTTP_NOT_FOUND_MSG, HTTP_OK_CODE, HTTP_UPDATED_MSG } from '../constants';
+import { HABBIT_STORAGE_KEY, HTTP_CREATED_CODE, HTTP_CREATED_MSG, HTTP_DELETED_MSG, HTTP_FETCHED_MSG, HTTP_NOT_FOUND_CODE, HTTP_NOT_FOUND_MSG, HTTP_OK_CODE, HTTP_UPDATED_MSG } from '../constants';
 
 export const storeLocalHabbit = ({name, description, color, maxRepetitions, frequency}: {name: string, description: string | null, color: string, maxRepetitions: number, frequency: HabbitFrequencies}) => {
     const habbitData = {
@@ -9,15 +9,16 @@ export const storeLocalHabbit = ({name, description, color, maxRepetitions, freq
         description,
         color,
         maxRepetitions,
-        frequency
+        frequency,
+        records: []
     }
 
-    const localHabbits = window.localStorage.getItem('habbits')
+    const localHabbits = window.localStorage.getItem(HABBIT_STORAGE_KEY)
     if(!localHabbits){
-        window.localStorage.setItem('habbits', JSON.stringify([habbitData]))
+        window.localStorage.setItem(HABBIT_STORAGE_KEY, JSON.stringify([habbitData]))
     }else{
         const dataHabbits = JSON.parse(localHabbits)
-        window.localStorage.setItem('habbits', JSON.stringify([...dataHabbits, habbitData]))
+        window.localStorage.setItem(HABBIT_STORAGE_KEY, JSON.stringify([...dataHabbits, habbitData]))
     }
 
     return {
@@ -29,7 +30,7 @@ export const storeLocalHabbit = ({name, description, color, maxRepetitions, freq
 }
 
 export const deleteLocalHabbit = ({habbitId}: {habbitId: string}) => {
-    const localHabbits = window.localStorage.getItem('habbits')
+    const localHabbits = window.localStorage.getItem(HABBIT_STORAGE_KEY)
     if(!localHabbits){
         return {
             status: HTTP_NOT_FOUND_CODE,
@@ -38,7 +39,7 @@ export const deleteLocalHabbit = ({habbitId}: {habbitId: string}) => {
         }
     }else{
         const dataHabbits = JSON.parse(localHabbits)
-        window.localStorage.setItem('habbits', JSON.stringify(dataHabbits.filter((dHabbit: any) => dHabbit.id !== habbitId )))
+        window.localStorage.setItem(HABBIT_STORAGE_KEY, JSON.stringify(dataHabbits.filter((dHabbit: any) => dHabbit.id !== habbitId )))
         return {
             status: HTTP_OK_CODE,
             data: [],
@@ -48,7 +49,7 @@ export const deleteLocalHabbit = ({habbitId}: {habbitId: string}) => {
 }
 
 export const getLocalHabbits = () => {
-    const localHabbits = window.localStorage.getItem('habbits')
+    const localHabbits = window.localStorage.getItem(HABBIT_STORAGE_KEY)
     return {
         status: HTTP_OK_CODE,
         data: localHabbits ? JSON.parse(localHabbits) : [],
@@ -67,7 +68,7 @@ export const updateLocalHabbit = ({name, description, color, maxRepetitions, fre
         frequency
     }
 
-    const localHabbits = window.localStorage.getItem('habbits')
+    const localHabbits = window.localStorage.getItem(HABBIT_STORAGE_KEY)
     if(!localHabbits){
         return {
             status: HTTP_NOT_FOUND_CODE,
@@ -87,7 +88,7 @@ export const updateLocalHabbit = ({name, description, color, maxRepetitions, fre
     }
 
     dataHabbits[habbitIndex] = habbitData
-    window.localStorage.setItem('habbits', JSON.stringify(dataHabbits))
+    window.localStorage.setItem(HABBIT_STORAGE_KEY, JSON.stringify(dataHabbits))
 
     return {
         status: HTTP_OK_CODE,
@@ -95,5 +96,4 @@ export const updateLocalHabbit = ({name, description, color, maxRepetitions, fre
         message: HTTP_UPDATED_MSG
     }
 
-    
 }

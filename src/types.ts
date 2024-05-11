@@ -17,6 +17,13 @@ export interface BasicOption {
     value: string;
 }
 
+export interface HabbitRecord {
+    id: string;
+    habbitId: string;
+    date: string;
+    repetitions: number;
+}
+
 export interface Habbit {
     id: string;
     name: string;
@@ -24,4 +31,5 @@ export interface Habbit {
     color: string;
     frequency: HabbitFrequencies;
     maxRepetitions: number;
+    records?: HabbitRecord[];
 }

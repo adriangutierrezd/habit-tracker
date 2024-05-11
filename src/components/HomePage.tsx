@@ -5,6 +5,9 @@ import HabbitModal from "./HabbitModal";
 import { getLocalHabbits } from "../services/habbitsService";
 import { Habbit } from "../types";
 import HabbitList from "./HabbitList";
+import { Toaster } from "sonner";
+import { useSelector } from "react-redux";
+import { RootState } from "../store";
 
 export default function HomePage() {
 
@@ -12,11 +15,24 @@ export default function HomePage() {
         themeChange(false)
     }, [])
 
-    const [habbits, setHabbits] = useState<Array<Habbit>>(getLocalHabbits().data)
+    const { isLogged } = useSelector((state: RootState) => {
+        return state.userSession
+    });
+    const [habbits, setHabbits] = useState<Array<Habbit>>([])
 
     const handleAddHabbit = (data: Habbit) => {
         setHabbits([...habbits, data])
     }
+
+    const fetchHabbits = () => {
+        if(!isLogged){
+            setHabbits(getLocalHabbits().data)
+        }
+    }
+
+    useEffect(() => {
+        fetchHabbits()
+    }, [])
 
     const handleUpdateHabbit = (data: Habbit, id: string) => {
         const newHabbits = structuredClone(habbits)
@@ -53,12 +69,13 @@ export default function HomePage() {
                             </main>
                         </div>
                     </div>
-                    <p className="flex-1">Habit Tracker</p>
+                    <h1 className="flex-1 font-semibold text-lg sm:text-2xl">Habit Tracker</h1>
                 </div>
                 <HabbitModal selectedHabbit={undefined} handleAddHabbit={handleAddHabbit} />
             </header>
             <main className="py-2 px-4">
-                <HabbitList handleUpdateHabbit={handleUpdateHabbit} habbits={habbits} />
+                <HabbitList refreshHabbits={fetchHabbits} handleUpdateHabbit={handleUpdateHabbit} habbits={habbits} />
+                <Toaster richColors={true} />
             </main>
         </>
     )

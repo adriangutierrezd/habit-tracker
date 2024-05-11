@@ -1,13 +1,36 @@
-import { Check, HeartPulse } from "lucide-react";
-import { Habbit } from "../types";
+import { Check, HeartPulse, Plus } from "lucide-react";
+import { Habbit, HabbitRecord } from "../types";
 import HabbitModal from "./HabbitModal";
+import { storeLocalHabbitRecord } from "../services/habbitRecordService";
+import { useSelector } from "react-redux";
+import { RootState } from "../store";
+import moment from "moment";
 
+
+const isHabbitCompleted = (habbit: Habbit, date: string) => {
+    if(!habbit.records) return false
+    return habbit.records.find((record: HabbitRecord) => record.date === date)?.repetitions === habbit.maxRepetitions
+}
 
 interface Props {
     readonly habbits: Habbit[]
     readonly handleUpdateHabbit: (data: Habbit, id: string) => void;
+    readonly refreshHabbits: () => void;
 }
-export default function HabbitList({ habbits, handleUpdateHabbit }: Props) {
+export default function HabbitList({ habbits, handleUpdateHabbit, refreshHabbits }: Props) {
+
+    const { isLogged } = useSelector((state: RootState) => {
+        return state.userSession
+    });
+
+    const handleStoreRecord = ({ habbitId, date }: { habbitId: string, date: string }) => {
+        if (!isLogged) {
+            storeLocalHabbitRecord({ habbitId, date })
+            refreshHabbits()
+        } else {
+            alert('TODO')
+        }
+    }
 
     return (
         <>
@@ -22,11 +45,9 @@ export default function HabbitList({ habbits, handleUpdateHabbit }: Props) {
                                 <div className="p-2" style={{ backgroundColor: habbit.color }}>
                                     <HeartPulse className="h-4 w-4 text-white" />
                                 </div>
-                                <h2 className="card-title">{habbit.name}</h2>
+                                <h2 className="card-title text-base sm:text-lg">{habbit.name}</h2>
                             </div>
-                            <button className="btn btn-secondary">
-                                <Check className="w-4 h-4" />
-                            </button>
+                            <HabbitButton habbit={habbit} handleStoreRecord={handleStoreRecord} />
                         </div>
                     </div>
                 </div>
@@ -37,5 +58,25 @@ export default function HabbitList({ habbits, handleUpdateHabbit }: Props) {
             })}
         </>
 
+    )
+}
+
+
+interface ButtonProps {
+    readonly habbit: Habbit;
+    readonly handleStoreRecord: ({ habbitId, date }: { habbitId: string, date: string }) => void;
+}
+
+const HabbitButton = ({ habbit, handleStoreRecord }: ButtonProps) => {
+
+    const todayDate = moment().format('YYYY-MM-DD') 
+    const completed = isHabbitCompleted(habbit, todayDate)
+
+    return (
+        <button onClick={() => {
+            if(!completed) handleStoreRecord({ habbitId: habbit.id, date: todayDate })
+        }} className={`btn btn-sm sm:btn-md btn-secondary ${completed ? '' : 'btn-outline'}`}>
+            {habbit.maxRepetitions > 1 ? (<Plus className="w-4 h-4" />) : (<Check className="w-4 h-4" />)}
+        </button>
     )
 }
