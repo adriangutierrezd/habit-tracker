@@ -18,6 +18,13 @@ export default function HomePage() {
         setHabbits([...habbits, data])
     }
 
+    const handleUpdateHabbit = (data: Habbit, id: string) => {
+        const newHabbits = structuredClone(habbits)
+        const habbitIndex = newHabbits.findIndex((habbit: Habbit) => habbit.id == id)
+        newHabbits[habbitIndex] = data
+        setHabbits(newHabbits)
+    }
+
     return (
         <>
             <header className="flex items-center justify-between py-2 px-4 my-6">
@@ -48,10 +55,10 @@ export default function HomePage() {
                     </div>
                     <p className="flex-1">Habit Tracker</p>
                 </div>
-                <HabbitModal handleAddHabbit={handleAddHabbit} />
+                <HabbitModal selectedHabbit={undefined} handleAddHabbit={handleAddHabbit} />
             </header>
             <main className="py-2 px-4">
-                <HabbitList habbits={habbits} />
+                <HabbitList handleUpdateHabbit={handleUpdateHabbit} habbits={habbits} />
             </main>
         </>
     )

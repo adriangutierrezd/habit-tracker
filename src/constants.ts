@@ -19,3 +19,12 @@ export const AVAILABLE_COLORS: Array<string> = [
     '#559e83',
     '#1b85b8'
 ]
+
+export const HTTP_OK_CODE = 200
+export const HTTP_CREATED_CODE = 201
+export const HTTP_NOT_FOUND_CODE = 404
+export const HTTP_FETCHED_MSG = 'Datos obtenidos con éxito'
+export const HTTP_DELETED_MSG = 'Recurso eliminado con éxito'
+export const HTTP_CREATED_MSG = 'Recurso creado con éxito'
+export const HTTP_UPDATED_MSG = 'Recurso actualizado con éxito'
+export const HTTP_NOT_FOUND_MSG = 'Recurso no encontrado'

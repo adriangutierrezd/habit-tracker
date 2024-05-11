@@ -1,28 +1,30 @@
 import React, { MouseEvent, useState } from "react";
-import { AVAILABLE_COLORS, HABIT_FREQUENCY } from "../constants";
+import { AVAILABLE_COLORS, HABIT_FREQUENCY, HTTP_CREATED_CODE, HTTP_OK_CODE } from "../constants";
 import { BasicOption, Habbit, HabbitFrequencies } from "../types";
 import { CirclePlus, Minus, Plus } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "../store";
-import { storeLocalHabbit } from "../services/habbitsService";
+import { storeLocalHabbit, updateLocalHabbit } from "../services/habbitsService";
 
 const MODAL_ID = 'HabbitModal'
 
 const defaultTrigger = <button className="btn modal-trigger" >
-<CirclePlus className="h-4 w-4" />
+<CirclePlus className="h-4 w-4 modal-trigger" />
 </button>
 
 interface Props {
-    readonly handleAddHabbit: (data: Habbit) => void
+    readonly handleAddHabbit?: (data: Habbit) => void;
+    readonly handleUpdateHabbit?: (data: Habbit, id: string) => void;
     readonly modalTrigger?: JSX.Element;
     readonly modalId?: string;
+    readonly selectedHabbit: Habbit | undefined;
 }
 
-export default function HabbitModal({handleAddHabbit, modalId = MODAL_ID, modalTrigger = defaultTrigger }: Props) {
+export default function HabbitModal({handleAddHabbit, modalId = MODAL_ID, modalTrigger = defaultTrigger, selectedHabbit = undefined, handleUpdateHabbit }: Props) {
 
     const [habbitName, setHabbitName] = useState<string>('')
     const [habbitDescription, setHabbitDescription] = useState<string>('')
-    const [habbitFrequency, setHabbitFrequency] = useState<HabbitFrequencies>()
+    const [habbitFrequency, setHabbitFrequency] = useState<HabbitFrequencies>('DAY')
     const [habbitColor, setHabbitColor] = useState<string>('')
     const [habbitMaxReps, setHabbitMaxReps] = useState<number>(1)
     const [habbitNameError, setHabbitNameError] = useState<string>()
@@ -38,11 +40,15 @@ export default function HabbitModal({handleAddHabbit, modalId = MODAL_ID, modalT
         resetFields()
         clearErrors()
 
-        if(status){
-            document.getElementById(modalId)?.showModal()
-        }else{
-            document.getElementById(modalId)?.close()
+        const modalElement = document.getElementById(modalId) as HTMLDialogElement | null;
+        if(modalElement){
+            if(status){
+                modalElement.showModal()
+            }else{
+                modalElement.close()
+            }
         }
+
 
     }
 
@@ -67,11 +73,19 @@ export default function HabbitModal({handleAddHabbit, modalId = MODAL_ID, modalT
     }
 
     const resetFields = () => {
-        setHabbitName('')
-        setHabbitDescription('')
-        setHabbitFrequency('')
-        setHabbitColor('')
-        setHabbitMaxReps(1)
+        if(selectedHabbit){
+            setHabbitName(selectedHabbit.name)
+            setHabbitDescription(selectedHabbit.description ?? '')
+            setHabbitFrequency(selectedHabbit.frequency)
+            setHabbitColor(selectedHabbit.color)
+            setHabbitMaxReps(selectedHabbit.maxRepetitions)
+        }else{
+            setHabbitName('')
+            setHabbitDescription('')
+            setHabbitFrequency('DAY')
+            setHabbitColor('')
+            setHabbitMaxReps(1)
+        }
     }
 
     const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -116,16 +130,33 @@ export default function HabbitModal({handleAddHabbit, modalId = MODAL_ID, modalT
             if(isLogged){
                 // TODO
             }else{
-                const response = storeLocalHabbit({
-                    name: habbitName,
-                    description: habbitDescription,
-                    color: habbitColor,
-                    maxRepetitions: habbitMaxReps,
-                    frequency: habbitFrequency ?? 'DAY'
-                })
-                if(response.status === 201){
-                    handleAddHabbit(response.data)
+                if(selectedHabbit){
+                    const response = updateLocalHabbit({
+                        id: selectedHabbit.id,
+                        name: habbitName,
+                        description: habbitDescription,
+                        color: habbitColor,
+                        maxRepetitions: habbitMaxReps,
+                        frequency: habbitFrequency ?? 'DAY'
+                    })
+
+                    if(response.status === HTTP_OK_CODE && handleUpdateHabbit){
+                        const habbit = response.data as Habbit
+                        handleUpdateHabbit(habbit, selectedHabbit.id)
+                    }
+                }else{
+                    const response = storeLocalHabbit({
+                        name: habbitName,
+                        description: habbitDescription,
+                        color: habbitColor,
+                        maxRepetitions: habbitMaxReps,
+                        frequency: habbitFrequency ?? 'DAY'
+                    })
+                    if(response.status === HTTP_CREATED_CODE && handleAddHabbit){
+                        handleAddHabbit(response.data)
+                    }
                 }
+
             }
 
             handleChangeModalStatus(false)
@@ -146,7 +177,7 @@ export default function HabbitModal({handleAddHabbit, modalId = MODAL_ID, modalT
             {modalTrigger && React.cloneElement(modalTrigger, { onClick: handleOpenModal })}
             <dialog id={modalId} className="modal">
                 <div className="modal-box">
-                    <h3 className="font-bold text-lg">Nuevo hábito</h3>
+                    <h3 className="font-bold text-lg">{selectedHabbit ? `Editar hábito ${selectedHabbit.name}` : 'Nuevo hábito'}</h3>
                     <form onSubmit={onSubmit} className="my-3 space-y-3">
                         <input type="text" value={habbitName} onChange={(event) => {
                             setHabbitName(event.target.value)
@@ -157,10 +188,9 @@ export default function HabbitModal({handleAddHabbit, modalId = MODAL_ID, modalT
                         }} className="textarea textarea-bordered w-full" placeholder="Descripción"></textarea>
                         <span className="text-sm text-red-500">{habbitDescriptionError}</span>
 
-                        <select defaultValue="0" className="select select-bordered w-full" onChange={(event) => {
-                            setHabbitFrequency(event.target.value)
+                        <select className="select select-bordered w-full" onChange={(event) => {
+                            setHabbitFrequency(event.target.value as HabbitFrequencies)
                         }}>
-                            <option disabled value="0">Periodicidad</option>
                             {HABIT_FREQUENCY.map((habbitFrequency: BasicOption) => {
                                 return <option key={habbitFrequency.value} value={habbitFrequency.value}>
                                     {habbitFrequency.label}

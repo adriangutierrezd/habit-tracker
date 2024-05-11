@@ -5,14 +5,9 @@ import HabbitModal from "./HabbitModal";
 
 interface Props {
     readonly habbits: Habbit[]
+    readonly handleUpdateHabbit: (data: Habbit, id: string) => void;
 }
-export default function HabbitList({ habbits }: Props) {
-
-
-
-    const handleAddHabbit = (data: Habbit) => {
-
-    }
+export default function HabbitList({ habbits, handleUpdateHabbit }: Props) {
 
     return (
         <>
@@ -37,7 +32,7 @@ export default function HabbitList({ habbits }: Props) {
                 </div>
 
                 return (
-                    <HabbitModal key={habbit.id} modalTrigger={trigger} modalId={`modal_${habbit.id}`} handleAddHabbit={handleAddHabbit} />
+                    <HabbitModal selectedHabbit={habbit} key={habbit.id} modalTrigger={trigger} modalId={`modal_${habbit.id}`} handleUpdateHabbit={handleUpdateHabbit} />
                 )
             })}
         </>
