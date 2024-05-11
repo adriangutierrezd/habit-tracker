@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { MouseEvent, useState } from "react";
 import { AVAILABLE_COLORS, HABIT_FREQUENCY } from "../constants";
 import { BasicOption, Habbit, HabbitFrequencies } from "../types";
 import { CirclePlus, Minus, Plus } from "lucide-react";
@@ -8,12 +8,17 @@ import { storeLocalHabbit } from "../services/habbitsService";
 
 const MODAL_ID = 'HabbitModal'
 
+const defaultTrigger = <button className="btn modal-trigger" >
+<CirclePlus className="h-4 w-4" />
+</button>
 
 interface Props {
     readonly handleAddHabbit: (data: Habbit) => void
+    readonly modalTrigger?: JSX.Element;
+    readonly modalId?: string;
 }
 
-export default function HabbitModal({handleAddHabbit}: Props) {
+export default function HabbitModal({handleAddHabbit, modalId = MODAL_ID, modalTrigger = defaultTrigger }: Props) {
 
     const [habbitName, setHabbitName] = useState<string>('')
     const [habbitDescription, setHabbitDescription] = useState<string>('')
@@ -29,15 +34,14 @@ export default function HabbitModal({handleAddHabbit}: Props) {
         return state.userSession
     });
 
-
     const handleChangeModalStatus = (status: boolean) => {
         resetFields()
         clearErrors()
 
         if(status){
-            document.getElementById(MODAL_ID)?.showModal()
+            document.getElementById(modalId)?.showModal()
         }else{
-            document.getElementById(MODAL_ID)?.close()
+            document.getElementById(modalId)?.close()
         }
 
     }
@@ -130,12 +134,17 @@ export default function HabbitModal({handleAddHabbit}: Props) {
         }
     }   
 
+    const handleOpenModal = (event: MouseEvent<HTMLButtonElement | HTMLDivElement>) => {
+        const target = event.target as HTMLElement;
+        if (target.classList.contains('modal-trigger')) {
+            handleChangeModalStatus(true);
+        }
+    }
+
     return (
         <>
-            <button className="btn" onClick={() => { handleChangeModalStatus(true) }}>
-                <CirclePlus className="h-4 w-4" />
-            </button>
-            <dialog id={MODAL_ID} className="modal">
+            {modalTrigger && React.cloneElement(modalTrigger, { onClick: handleOpenModal })}
+            <dialog id={modalId} className="modal">
                 <div className="modal-box">
                     <h3 className="font-bold text-lg">Nuevo hábito</h3>
                     <form onSubmit={onSubmit} className="my-3 space-y-3">
