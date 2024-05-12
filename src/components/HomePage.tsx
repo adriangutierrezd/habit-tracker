@@ -1,4 +1,4 @@
-import { Settings } from "lucide-react";
+import { CirclePlus, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { themeChange } from 'theme-change'
 import HabbitModal from "./HabbitModal";
@@ -25,7 +25,7 @@ export default function HomePage() {
     }
 
     const fetchHabbits = () => {
-        if(!isLogged){
+        if (!isLogged) {
             setHabbits(getLocalHabbits().data)
         }
     }
@@ -74,7 +74,23 @@ export default function HomePage() {
                 <HabbitModal selectedHabbit={undefined} handleAddHabbit={handleAddHabbit} />
             </header>
             <main className="py-2 px-4">
-                <HabbitList refreshHabbits={fetchHabbits} handleUpdateHabbit={handleUpdateHabbit} habbits={habbits} />
+                {habbits.length > 0 ? (
+                    <HabbitList refreshHabbits={fetchHabbits} handleUpdateHabbit={handleUpdateHabbit} habbits={habbits} />
+                ) : (
+                    <div className="border border-dashed p-6 border-2 flex items-center justify-center flex-col space-y-4 rounded">
+                        <h2 className="font-semibold text-md sm:text-xl">Aún no has añadido ningún hábito</h2>
+                        <p>Guardaremos todos los hábitos que crees en esta plataforma junto con tu seguimento</p>
+                        <HabbitModal modalId="firstHabbitModal" selectedHabbit={undefined} handleAddHabbit={handleAddHabbit} modalTrigger={
+                            <button>
+                                <button className="btn btn-primary">
+                                    <CirclePlus className="h-4 w-4" />
+                                    Añadir
+                                </button>
+                            </button>
+                        } />
+                    </div>
+                )}
+
                 <Toaster richColors={true} />
             </main>
         </>

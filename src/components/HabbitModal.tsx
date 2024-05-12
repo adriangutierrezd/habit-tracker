@@ -217,7 +217,7 @@ export default function HabbitModal({ handleAddHabbit, modalId = MODAL_ID, modal
                         <label htmlFor="maxReps" className="block">Máximas veces completado {habbitFrequency && <span className="lowercase">por {HABIT_FREQUENCY.find((habbit) => habbit.value === habbitFrequency)?.label}</span>}</label>
                         <div className="flex flex-col sm:flex-row items-center space-x-2 space-y-2">
                             <input disabled={true} type="number" step="1" min="1" value={habbitMaxReps} name="maxReps" className="input input-bordered w-full sm:flex-1" />
-                            <div className="flex items-center justify-end space-x-2 w-full">
+                            <div className="flex items-center justify-end space-x-2 w-full mt-0 sm:w-auto">
                                 <button onClick={() => {
                                     handleMaxRepsChange('MINUS')
                                 }} type="button" disabled={isMinusBtnDisabled()} className="btn">
