@@ -2,7 +2,7 @@ import { CirclePlus, Info, Settings, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { themeChange } from 'theme-change'
 import HabbitModal from "./HabbitModal";
-import { getLocalHabbits } from "../services/habbitsService";
+import { getLocalHabbits, getRemoteHabbits } from "../services/habbitsService";
 import { Habbit } from "../types";
 import HabbitList from "./HabbitList";
 import { Toaster } from "sonner";
@@ -16,19 +16,30 @@ export default function HomePage() {
         themeChange(false)
     }, [])
 
-    const { isLogged } = useSelector((state: RootState) => {
+    const { isLogged, token } = useSelector((state: RootState) => {
         return state.userSession
     });
     const [habbits, setHabbits] = useState<Array<Habbit>>([])
+    const [isLoading, setIsLoading] = useState<boolean>(true)
     const [showAccountBanner, setShowAccountBanner] = useState<boolean>(false)
 
     const handleAddHabbit = (data: Habbit) => {
         setHabbits([...habbits, data])
     }
 
-    const fetchHabbits = () => {
+    const fetchHabbits = async () => {
+        setIsLoading(true)
         if (!isLogged) {
             setHabbits(getLocalHabbits().data)
+            setIsLoading(false)
+        } else {
+            try {
+                const response = await getRemoteHabbits(token ?? '')
+                setHabbits(response.data)
+                setIsLoading(false)
+            } catch (error) {
+                // TODO
+            }
         }
     }
 
@@ -120,19 +131,29 @@ export default function HomePage() {
                     </div>
                 )}
 
-                {habbits.length > 0 ? (
-                    <HabbitList refreshHabbits={fetchHabbits} handleUpdateHabbit={handleUpdateHabbit} habbits={habbits} />
-                ) : (
-                    <div className="border border-dashed p-6 border-2 flex items-center justify-center flex-col space-y-4 rounded">
-                        <h2 className="font-semibold text-md sm:text-xl">Aún no has añadido ningún hábito</h2>
-                        <p>Guardaremos todos los hábitos que crees en esta plataforma junto con tu seguimento</p>
-                        <HabbitModal modalId="firstHabbitModal" selectedHabbit={undefined} handleAddHabbit={handleAddHabbit} modalTrigger={
-                            <button className="btn btn-primary modal-trigger">
-                                <CirclePlus className="h-4 w-4 modal-trigger" />
-                                Añadir
-                            </button>
-                        } />
+                {isLoading ? (
+                    <div className="flex flex-col space-y-4">
+                        <div className="skeleton w-full h-32"></div>
+                        <div className="skeleton w-full h-32"></div>
+                        <div className="skeleton w-full h-32"></div>
                     </div>
+                ) : (
+                    <>
+                        {habbits.length > 0 ? (
+                            <HabbitList refreshHabbits={fetchHabbits} handleUpdateHabbit={handleUpdateHabbit} habbits={habbits} />
+                        ) : (
+                            <div className="border border-dashed p-6 border-2 flex items-center justify-center flex-col space-y-4 rounded">
+                                <h2 className="font-semibold text-md sm:text-xl">Aún no has añadido ningún hábito</h2>
+                                <p>Guardaremos todos los hábitos que crees en esta plataforma junto con tu seguimento</p>
+                                <HabbitModal modalId="firstHabbitModal" selectedHabbit={undefined} handleAddHabbit={handleAddHabbit} modalTrigger={
+                                    <button className="btn btn-primary modal-trigger">
+                                        <CirclePlus className="h-4 w-4 modal-trigger" />
+                                        Añadir
+                                    </button>
+                                } />
+                            </div>
+                        )}
+                    </>
                 )}
 
                 <Toaster richColors={true} />

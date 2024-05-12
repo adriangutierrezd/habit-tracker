@@ -4,7 +4,7 @@ import { BasicOption, Habbit, HabbitFrequencies } from "../types";
 import { CirclePlus, Minus, Plus } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "../store";
-import { storeLocalHabbit, updateLocalHabbit } from "../services/habbitsService";
+import { storeLocalHabbit, storeRemoteHabbit, updateLocalHabbit } from "../services/habbitsService";
 import { toast } from 'sonner'
 
 const MODAL_ID = 'HabbitModal'
@@ -33,7 +33,7 @@ export default function HabbitModal({ handleAddHabbit, modalId = MODAL_ID, modal
     const [habbitColorError, setHabbitColorError] = useState<string>()
     const [habbitMaxRepsError, setHabbitMaxRepsError] = useState<string>()
     const [habbitFrequencyError, setHabbitFrequencyError] = useState<string>('')
-    const { isLogged } = useSelector((state: RootState) => {
+    const { isLogged, token } = useSelector((state: RootState) => {
         return state.userSession
     });
 
@@ -87,7 +87,7 @@ export default function HabbitModal({ handleAddHabbit, modalId = MODAL_ID, modal
         }
     }
 
-    const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         try {
 
             event.preventDefault()
@@ -127,7 +127,19 @@ export default function HabbitModal({ handleAddHabbit, modalId = MODAL_ID, modal
             }
 
             if (isLogged) {
-                // TODO
+               if(selectedHabbit){
+                //
+               }else{
+                const response = await storeRemoteHabbit({
+                    name: habbitName,
+                    description: habbitDescription,
+                    color: habbitColor,
+                    maxRepetitions: habbitMaxReps,
+                    frequency: habbitFrequency ?? 'DAY',
+                    token: token ?? undefined
+                })
+                console.log(response)
+               }
             } else {
                 if (selectedHabbit) {
                     const response = updateLocalHabbit({
@@ -136,7 +148,8 @@ export default function HabbitModal({ handleAddHabbit, modalId = MODAL_ID, modal
                         description: habbitDescription,
                         color: habbitColor,
                         maxRepetitions: habbitMaxReps,
-                        frequency: habbitFrequency ?? 'DAY'
+                        frequency: habbitFrequency ?? 'DAY',
+                        token: undefined
                     })
 
                     if (response.status === HTTP_OK_CODE && handleUpdateHabbit) {
@@ -152,7 +165,8 @@ export default function HabbitModal({ handleAddHabbit, modalId = MODAL_ID, modal
                         description: habbitDescription,
                         color: habbitColor,
                         maxRepetitions: habbitMaxReps,
-                        frequency: habbitFrequency ?? 'DAY'
+                        frequency: habbitFrequency ?? 'DAY',
+                        token: undefined
                     })
                     if (response.status === HTTP_CREATED_CODE && handleAddHabbit) {
                         handleAddHabbit(response.data)

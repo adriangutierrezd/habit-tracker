@@ -1,7 +1,7 @@
 import { Check, HeartPulse, Plus } from "lucide-react";
 import { Habbit, HabbitRecord } from "../types";
 import HabbitModal from "./HabbitModal";
-import { storeLocalHabbitRecord } from "../services/habbitRecordService";
+import { storeLocalHabbitRecord, storeRemoteHabbitRecord } from "../services/habbitRecordService";
 import { useSelector } from "react-redux";
 import { RootState } from "../store";
 import moment from "moment";
@@ -19,16 +19,16 @@ interface Props {
 }
 export default function HabbitList({ habbits, handleUpdateHabbit, refreshHabbits }: Props) {
 
-    const { isLogged } = useSelector((state: RootState) => {
+    const { isLogged, token } = useSelector((state: RootState) => {
         return state.userSession
     });
 
     const handleStoreRecord = ({ habbitId, date }: { habbitId: string, date: string }) => {
         if (!isLogged) {
-            storeLocalHabbitRecord({ habbitId, date })
+            storeLocalHabbitRecord({ habbitId, date, token: undefined })
             refreshHabbits()
         } else {
-            alert('TODO')
+            storeRemoteHabbitRecord({habbitId, date, token: token ?? undefined })
         }
     }
 

@@ -1,8 +1,28 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Habbit, HabbitFrequencies } from '../types';
-import { HABBIT_STORAGE_KEY, HTTP_CREATED_CODE, HTTP_CREATED_MSG, HTTP_DELETED_MSG, HTTP_FETCHED_MSG, HTTP_NOT_FOUND_CODE, HTTP_NOT_FOUND_MSG, HTTP_OK_CODE, HTTP_UPDATED_MSG } from '../constants';
+import { HABBIT_STORAGE_KEY, HTTP_CREATED_CODE, HTTP_CREATED_MSG, HTTP_DELETED_MSG, HTTP_FETCHED_MSG, HTTP_GENERAL_ERROR_MSG, HTTP_NOT_FOUND_CODE, HTTP_NOT_FOUND_MSG, HTTP_OK_CODE, HTTP_UPDATED_MSG } from '../constants';
+import { getHeaders } from '../utils';
 
-export const storeLocalHabbit = ({name, description, color, maxRepetitions, frequency}: {name: string, description: string | null, color: string, maxRepetitions: number, frequency: HabbitFrequencies}) => {
+interface StoringProps {
+    name: string,
+    description: string | null,
+    color: string,
+    maxRepetitions: number,
+    frequency: HabbitFrequencies,
+    token: string | undefined
+}
+
+interface UpdatingProps {
+    id: string,
+    name: string,
+    description: string | null,
+    color: string,
+    maxRepetitions: number,
+    frequency: HabbitFrequencies,
+    token: string | undefined
+}
+
+export const storeLocalHabbit = ({name, description, color, maxRepetitions, frequency}: StoringProps) => {
     const habbitData = {
         id: uuidv4(),
         name,
@@ -57,7 +77,7 @@ export const getLocalHabbits = () => {
     }
 }
 
-export const updateLocalHabbit = ({name, description, color, maxRepetitions, frequency, id}: {id: string, name: string, description: string | null, color: string, maxRepetitions: number, frequency: HabbitFrequencies}) => {
+export const updateLocalHabbit = ({name, description, color, maxRepetitions, frequency, id}: UpdatingProps) => {
     
     const habbitData = {
         id,
@@ -96,4 +116,73 @@ export const updateLocalHabbit = ({name, description, color, maxRepetitions, fre
         message: HTTP_UPDATED_MSG
     }
 
+}
+
+export const storeRemoteHabbit = async({name, description, color, maxRepetitions, frequency, token}: StoringProps) => {
+    try{
+
+        const myHeaders = getHeaders(token ?? null)
+
+        const raw = JSON.stringify({ name, description, color, maxRepetitions, frequency });
+    
+        const requestOptions: RequestInit = {
+            method: 'POST',
+            headers: myHeaders,
+            body: raw,
+            redirect: 'follow'
+        };
+    
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/habits`, requestOptions)
+        const data = await response.json()
+        if(data.status !== HTTP_CREATED_CODE) throw new Error(data.message)
+        return data
+
+    }catch(error){
+        throw new Error(error instanceof Error ? error.message : HTTP_GENERAL_ERROR_MSG)
+    }
+}
+
+export const updateRemoteHabbit = async({name, description, color, maxRepetitions, frequency, token, id}: UpdatingProps) => {
+    try{
+
+        const myHeaders = getHeaders(token ?? null)
+
+        const raw = JSON.stringify({ name, description, color, maxRepetitions, frequency });
+    
+        const requestOptions: RequestInit = {
+            method: 'PUT',
+            headers: myHeaders,
+            body: raw,
+            redirect: 'follow'
+        };
+    
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/habits/${id}`, requestOptions)
+        const data = await response.json()
+        if(data.status !== HTTP_OK_CODE) throw new Error(data.message)
+        return data
+
+    }catch(error){
+        throw new Error(error instanceof Error ? error.message : HTTP_GENERAL_ERROR_MSG)
+    }
+}
+
+export const getRemoteHabbits = async (token: string) => {
+    try{
+
+        const myHeaders = getHeaders(token ?? null)
+
+        const requestOptions: RequestInit = {
+            method: 'GET',
+            headers: myHeaders,
+            redirect: 'follow'
+        };
+    
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/habits`, requestOptions)
+        const data = await response.json()
+        if(data.status !== HTTP_OK_CODE) throw new Error(data.message)
+        return data
+
+    }catch(error){
+        throw new Error(error instanceof Error ? error.message : HTTP_GENERAL_ERROR_MSG)
+    }
 }
