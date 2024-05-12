@@ -28,6 +28,7 @@ export const HTTP_DELETED_MSG = 'Recurso eliminado con éxito'
 export const HTTP_CREATED_MSG = 'Recurso creado con éxito'
 export const HTTP_UPDATED_MSG = 'Recurso actualizado con éxito'
 export const HTTP_NOT_FOUND_MSG = 'Recurso no encontrado'
+export const HTTP_GENERAL_ERROR_MSG = 'Ha ocurrido un error inesperado'
 export const HABBIT_STORAGE_KEY = 'habbits'
 export const HABBIT_RECORD_STORAGE_KEY = 'habbit-records'
 

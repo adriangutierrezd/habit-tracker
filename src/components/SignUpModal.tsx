@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../store";
-import { toast } from 'sonner'
+import { signUp } from "../services/usersService";
+import { login } from "../slices/userSlice";
 
 const MODAL_ID = 'signInModal'
 
@@ -11,6 +12,7 @@ interface Props {
 
 export default function SignUpModal({ modalTrigger }: Props) {
 
+    const dispatch = useDispatch()
     const [email, setEmail] = useState<string>('')
     const [password, setPassword] = useState<string>('')
     const [passwordRepeat, setPasswordRepeat] = useState<string>('')
@@ -35,7 +37,6 @@ export default function SignUpModal({ modalTrigger }: Props) {
         }
     }
 
-
     const clearErrors = () => {
         setEmailError('')
         setPasswordError('')
@@ -48,7 +49,7 @@ export default function SignUpModal({ modalTrigger }: Props) {
         setPasswordError('')
     }
 
-    const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         try {
 
             event.preventDefault()
@@ -59,10 +60,23 @@ export default function SignUpModal({ modalTrigger }: Props) {
                 hasErrors = true
                 setPasswordRepeatError('Las contraseñas no coinciden')
             }
-
+            
             if (hasErrors) {
                 return
             }
+
+            const response = await signUp({email, password})
+            const {data} = response
+
+            const userData = {
+                token: data.token,
+                user: data.user
+              }
+         
+              dispatch(login(userData))
+              handleChangeModalStatus(false)
+            
+
         } catch (error) {
             // TODO
         }
