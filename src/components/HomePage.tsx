@@ -1,4 +1,4 @@
-import { CirclePlus, Settings } from "lucide-react";
+import { CirclePlus, Info, Settings, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { themeChange } from 'theme-change'
 import HabbitModal from "./HabbitModal";
@@ -8,6 +8,7 @@ import HabbitList from "./HabbitList";
 import { Toaster } from "sonner";
 import { useSelector } from "react-redux";
 import { RootState } from "../store";
+import SignUpModal from "./SignUpModal";
 
 export default function HomePage() {
 
@@ -19,6 +20,7 @@ export default function HomePage() {
         return state.userSession
     });
     const [habbits, setHabbits] = useState<Array<Habbit>>([])
+    const [showAccountBanner, setShowAccountBanner] = useState<boolean>(false)
 
     const handleAddHabbit = (data: Habbit) => {
         setHabbits([...habbits, data])
@@ -32,6 +34,10 @@ export default function HomePage() {
 
     useEffect(() => {
         fetchHabbits()
+        const hideBanner = window.localStorage.getItem('hide-account-banner')
+        if (!hideBanner) {
+            setShowAccountBanner(true)
+        }
     }, [])
 
     const handleUpdateHabbit = (data: Habbit, id: string) => {
@@ -41,6 +47,12 @@ export default function HomePage() {
         setHabbits(newHabbits)
     }
 
+    const handleCloseAccountBanner = () => {
+        window.localStorage.setItem('hide-account-banner', '1')
+        setShowAccountBanner(false)
+    }
+
+
     return (
         <>
             <header className="flex items-center justify-between py-2 px-4 my-6">
@@ -48,7 +60,9 @@ export default function HomePage() {
                     <div className="drawer w-auto z-20">
                         <input id="settings-drawer" type="checkbox" className="drawer-toggle" />
                         <div className="drawer-content">
-                            <label htmlFor="settings-drawer" className="btn drawer-button"><Settings className="h-4 w-4" /></label>
+                            <label htmlFor="settings-drawer" className="btn drawer-button">
+                                <Settings className="h-4 w-4" />
+                            </label>
                         </div>
                         <div className="drawer-side">
                             <label htmlFor="settings-drawer" aria-label="close sidebar" className="drawer-overlay"></label>
@@ -74,6 +88,38 @@ export default function HomePage() {
                 <HabbitModal selectedHabbit={undefined} handleAddHabbit={handleAddHabbit} />
             </header>
             <main className="py-2 px-4">
+
+                {(!isLogged && showAccountBanner) && (
+                    <div role="alert" className="alert mb-4">
+                        <article>
+                            <header className="font-semibold text-md flex justify-between items-center mb-3">
+                                <div className="flex items-center">
+                                    <Info className="h-5 w-5 mr-2 stroke-info" />
+                                    No has iniciado sesión
+                                </div>
+                                <button onClick={handleCloseAccountBanner} className="btn btn-sm btn-ghost">
+                                    <X className="h-4 w-4" />
+                                </button>
+                            </header>
+                            <main>
+                                <p>Si no tienes una cuenta tus datos se guardarán pero solo estarán disponibles en este dispositivo.</p>
+                                <p>Al crear una cuenta <b>tus datos se traspasarán para que no los pierdas</b> y puedas acceder a ellos en cualquier momento.</p>
+                                <div className="flex items-center justify-end space-x-4">
+                                    <button className="btn btn-outline btn-primary">
+                                        Iniciar sesión
+                                    </button>
+                                    <SignUpModal modalTrigger={
+                                        <button className="btn btn-primary">
+                                            Crear cuenta
+                                        </button>
+                                    } />
+
+                                </div>
+                            </main>
+                        </article>
+                    </div>
+                )}
+
                 {habbits.length > 0 ? (
                     <HabbitList refreshHabbits={fetchHabbits} handleUpdateHabbit={handleUpdateHabbit} habbits={habbits} />
                 ) : (
@@ -81,11 +127,9 @@ export default function HomePage() {
                         <h2 className="font-semibold text-md sm:text-xl">Aún no has añadido ningún hábito</h2>
                         <p>Guardaremos todos los hábitos que crees en esta plataforma junto con tu seguimento</p>
                         <HabbitModal modalId="firstHabbitModal" selectedHabbit={undefined} handleAddHabbit={handleAddHabbit} modalTrigger={
-                            <button>
-                                <button className="btn btn-primary">
-                                    <CirclePlus className="h-4 w-4" />
-                                    Añadir
-                                </button>
+                            <button className="btn btn-primary modal-trigger">
+                                <CirclePlus className="h-4 w-4 modal-trigger" />
+                                Añadir
                             </button>
                         } />
                     </div>
