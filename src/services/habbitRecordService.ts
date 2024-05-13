@@ -1,11 +1,17 @@
 import { v4 as uuidv4 } from 'uuid';
-import { HTTP_CREATED_CODE, HTTP_CREATED_MSG, HABBIT_RECORD_STORAGE_KEY, HABBIT_STORAGE_KEY, HTTP_NOT_FOUND_CODE, HTTP_NOT_FOUND_MSG, HTTP_GENERAL_ERROR_MSG} from "../constants"
+import { HTTP_CREATED_CODE, HTTP_CREATED_MSG, HABBIT_RECORD_STORAGE_KEY, HABBIT_STORAGE_KEY, HTTP_NOT_FOUND_CODE, HTTP_NOT_FOUND_MSG, HTTP_GENERAL_ERROR_MSG, HTTP_OK_CODE} from "../constants"
 import { Habbit, HabbitRecord } from "../types"
 import { getHeaders } from '../utils';
 
 interface StoringProps {
     habbitId: string,
     date: string,
+    token: string | undefined
+}
+
+interface UpdatingProps {
+    habbitRecordId: string,
+    repetitions: number,
     token: string | undefined
 }
 
@@ -80,6 +86,30 @@ export const storeRemoteHabbitRecord = async ({habbitId, date, token}: StoringPr
         const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/habit-records`, requestOptions)
         const data = await response.json()
         if(data.status !== HTTP_CREATED_CODE) throw new Error(data.message)
+        return data
+
+    }catch(error){
+        throw new Error(error instanceof Error ? error.message : HTTP_GENERAL_ERROR_MSG)
+    }
+}
+
+export const updateRemoteHabbitRecord = async ({habbitRecordId, repetitions, token}: UpdatingProps) => {
+    try{
+
+        const myHeaders = getHeaders(token ?? null)
+
+        const raw = JSON.stringify({ repetitions });
+    
+        const requestOptions: RequestInit = {
+            method: 'PATCH',
+            headers: myHeaders,
+            body: raw,
+            redirect: 'follow'
+        };
+    
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/habit-records/${habbitRecordId}`, requestOptions)
+        const data = await response.json()
+        if(data.status !== HTTP_OK_CODE) throw new Error(data.message)
         return data
 
     }catch(error){

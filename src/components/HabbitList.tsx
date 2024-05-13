@@ -1,34 +1,57 @@
 import { Check, HeartPulse, Plus } from "lucide-react";
 import { Habbit, HabbitRecord } from "../types";
 import HabbitModal from "./HabbitModal";
-import { storeLocalHabbitRecord, storeRemoteHabbitRecord } from "../services/habbitRecordService";
+import { storeLocalHabbitRecord, storeRemoteHabbitRecord, updateRemoteHabbitRecord } from "../services/habbitRecordService";
 import { useSelector } from "react-redux";
 import { RootState } from "../store";
 import moment from "moment";
 
 
 const isHabbitCompleted = (habbit: Habbit, date: string) => {
-    if(!habbit.records) return false
+    if (!habbit.records) return false
     return habbit.records.find((record: HabbitRecord) => record.date === date)?.repetitions === habbit.maxRepetitions
 }
 
 interface Props {
     readonly habbits: Habbit[]
     readonly handleUpdateHabbit: (data: Habbit, id: string) => void;
-    readonly refreshHabbits: () => void;
+    readonly handleAddHabbit: (data: Habbit) => void;
 }
-export default function HabbitList({ habbits, handleUpdateHabbit, refreshHabbits }: Props) {
+
+
+interface HandleStoreRecordProps {
+    habbitId: string;
+    date: string;
+    habbit: Habbit;
+}
+
+
+export default function HabbitList({ habbits, handleUpdateHabbit, handleAddHabbit }: Props) {
 
     const { isLogged, token } = useSelector((state: RootState) => {
         return state.userSession
     });
 
-    const handleStoreRecord = ({ habbitId, date }: { habbitId: string, date: string }) => {
+    const handleStoreRecord = async ({ habbitId, date, habbit }: HandleStoreRecordProps) => {
         if (!isLogged) {
-            storeLocalHabbitRecord({ habbitId, date, token: undefined })
-            refreshHabbits()
+            const response = storeLocalHabbitRecord({ habbitId, date, token: undefined })
+            const habit = response.data as Habbit
+            handleUpdateHabbit(habit, habit.id)
+        } else if (habbit.records && habbit.records.length > 0) {
+            const findRecord = habbit.records.find((record: HabbitRecord) => record.date === date)
+            if (findRecord) {
+                const response = await updateRemoteHabbitRecord({ habbitRecordId: findRecord.id, repetitions: findRecord.repetitions + 1, token: token ?? undefined })
+                const habit = response.data as Habbit
+                handleUpdateHabbit(habit, habit.id)
+            } else {
+                const response = await storeRemoteHabbitRecord({ habbitId, date, token: token ?? undefined })
+                const habit = response.data as Habbit
+                handleUpdateHabbit(habit, habit.id)
+            }
         } else {
-            storeRemoteHabbitRecord({habbitId, date, token: token ?? undefined })
+            const response = await storeRemoteHabbitRecord({ habbitId, date, token: token ?? undefined })
+            const habit = response.data as Habbit
+            handleUpdateHabbit(habit, habit.id)
         }
     }
 
@@ -64,17 +87,17 @@ export default function HabbitList({ habbits, handleUpdateHabbit, refreshHabbits
 
 interface ButtonProps {
     readonly habbit: Habbit;
-    readonly handleStoreRecord: ({ habbitId, date }: { habbitId: string, date: string }) => void;
+    readonly handleStoreRecord: ({ habbitId, date, habbit }: HandleStoreRecordProps) => void;
 }
 
 const HabbitButton = ({ habbit, handleStoreRecord }: ButtonProps) => {
 
-    const todayDate = moment().format('YYYY-MM-DD') 
+    const todayDate = moment().format('YYYY-MM-DD')
     const completed = isHabbitCompleted(habbit, todayDate)
 
     return (
         <button onClick={() => {
-            if(!completed) handleStoreRecord({ habbitId: habbit.id, date: todayDate })
+            if (!completed) handleStoreRecord({ habbitId: habbit.id, date: todayDate, habbit })
         }} className={`btn btn-sm sm:btn-md btn-secondary ${completed ? '' : 'btn-outline'}`}>
             {habbit.maxRepetitions > 1 ? (<Plus className="w-4 h-4" />) : (<Check className="w-4 h-4" />)}
         </button>

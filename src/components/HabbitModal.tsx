@@ -1,10 +1,10 @@
 import React, { MouseEvent, useState } from "react";
-import { AVAILABLE_COLORS, HABIT_FREQUENCY, HTTP_CREATED_CODE, HTTP_OK_CODE } from "../constants";
+import { AVAILABLE_COLORS, HABIT_FREQUENCY, HTTP_CREATED_CODE, HTTP_GENERAL_ERROR_MSG, HTTP_OK_CODE } from "../constants";
 import { BasicOption, Habbit, HabbitFrequencies } from "../types";
 import { CirclePlus, Minus, Plus } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "../store";
-import { storeLocalHabbit, storeRemoteHabbit, updateLocalHabbit } from "../services/habbitsService";
+import { storeLocalHabbit, storeRemoteHabbit, updateLocalHabbit, updateRemoteHabbit } from "../services/habbitsService";
 import { toast } from 'sonner'
 
 const MODAL_ID = 'HabbitModal'
@@ -87,49 +87,68 @@ export default function HabbitModal({ handleAddHabbit, modalId = MODAL_ID, modal
         }
     }
 
+    const checkFormHasErrors = () => {
+        let hasErrors = false
+        clearErrors()
+
+        if (!habbitName || habbitName.trim().length < 3) {
+            hasErrors = true
+            setHabbitNameError('El nombre debe tener al menos 3 caracteres')
+        } else if (habbitName.length > 50) {
+            hasErrors = true
+            setHabbitNameError('El nombre no puede superar los 50 caracteres')
+        }
+
+        if (habbitDescription && habbitDescription.length > 255) {
+            hasErrors = true
+            setHabbitDescriptionError('La descripción no puede superar los 255 caracteres')
+        }
+
+        if (!habbitColor) {
+            hasErrors = true
+            setHabbitColorError('El color es obligatorio')
+        }
+
+        if (!habbitFrequency) {
+            hasErrors = true
+            setHabbitFrequencyError('Debes seleccionar una periodicidad')
+        }
+
+        if (!habbitMaxReps || habbitMaxReps < 1 || habbitMaxReps > 65535) {
+            hasErrors = true
+            setHabbitMaxRepsError('El número de repeticiones debe ser superior a 1')
+        }
+
+        return hasErrors
+    }
+
     const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         try {
 
             event.preventDefault()
-            let hasErrors = false
-            clearErrors()
-
-            if (!habbitName || habbitName.trim().length < 3) {
-                hasErrors = true
-                setHabbitNameError('El nombre debe tener al menos 3 caracteres')
-            } else if (habbitName.length > 50) {
-                hasErrors = true
-                setHabbitNameError('El nombre no puede superar los 50 caracteres')
-            }
-
-            if (habbitDescription && habbitDescription.length > 255) {
-                hasErrors = true
-                setHabbitDescriptionError('La descripción no puede superar los 255 caracteres')
-            }
-
-            if (!habbitColor) {
-                hasErrors = true
-                setHabbitColorError('El color es obligatorio')
-            }
-
-            if (!habbitFrequency) {
-                hasErrors = true
-                setHabbitFrequencyError('Debes seleccionar una periodicidad')
-            }
-
-            if (!habbitMaxReps || habbitMaxReps < 1 || habbitMaxReps > 65535) {
-                hasErrors = true
-                setHabbitMaxRepsError('El número de repeticiones debe ser superior a 1')
-            }
-
-            if (hasErrors) {
+            if (checkFormHasErrors()) {
                 return
             }
 
-            if (isLogged) {
-               if(selectedHabbit){
-                //
-               }else{
+            if(isLogged && selectedHabbit){
+                const response = await updateRemoteHabbit({
+                    name: habbitName,
+                    description: habbitDescription,
+                    color: habbitColor,
+                    maxRepetitions: habbitMaxReps,
+                    frequency: habbitFrequency ?? 'DAY',
+                    token: token ?? undefined,
+                    id: selectedHabbit.id
+                })
+
+                if (handleUpdateHabbit) {
+                    const habit = response.data as Habbit
+                    handleUpdateHabbit(habit, habit.id)
+                }
+                handleChangeModalStatus(false)
+                toast(response.message)
+                return
+            }else if(isLogged && !selectedHabbit){
                 const response = await storeRemoteHabbit({
                     name: habbitName,
                     description: habbitDescription,
@@ -138,48 +157,51 @@ export default function HabbitModal({ handleAddHabbit, modalId = MODAL_ID, modal
                     frequency: habbitFrequency ?? 'DAY',
                     token: token ?? undefined
                 })
-                console.log(response)
-               }
-            } else {
-                if (selectedHabbit) {
-                    const response = updateLocalHabbit({
-                        id: selectedHabbit.id,
-                        name: habbitName,
-                        description: habbitDescription,
-                        color: habbitColor,
-                        maxRepetitions: habbitMaxReps,
-                        frequency: habbitFrequency ?? 'DAY',
-                        token: undefined
-                    })
 
-                    if (response.status === HTTP_OK_CODE && handleUpdateHabbit) {
-                        const habbit = response.data as Habbit
-                        handleUpdateHabbit(habbit, selectedHabbit.id)
-                        handleChangeModalStatus(false)
-                        toast(response.message)
-                        return
-                    }
-                } else {
-                    const response = storeLocalHabbit({
-                        name: habbitName,
-                        description: habbitDescription,
-                        color: habbitColor,
-                        maxRepetitions: habbitMaxReps,
-                        frequency: habbitFrequency ?? 'DAY',
-                        token: undefined
-                    })
-                    if (response.status === HTTP_CREATED_CODE && handleAddHabbit) {
-                        handleAddHabbit(response.data)
-                        handleChangeModalStatus(false)
-                        toast(response.message)
-                        return
-                    }
+                if (handleAddHabbit) {
+                    const habit = response.data as Habbit
+                    handleAddHabbit(habit)
                 }
+                handleChangeModalStatus(false)
+                toast(response.message)
+                return
+            }else if(!isLogged && selectedHabbit){
+                const response = updateLocalHabbit({
+                    id: selectedHabbit.id,
+                    name: habbitName,
+                    description: habbitDescription,
+                    color: habbitColor,
+                    maxRepetitions: habbitMaxReps,
+                    frequency: habbitFrequency ?? 'DAY',
+                    token: undefined
+                })
 
+                if (response.status === HTTP_OK_CODE && handleUpdateHabbit) {
+                    const habbit = response.data as Habbit
+                    handleUpdateHabbit(habbit, selectedHabbit.id)
+                    handleChangeModalStatus(false)
+                    toast(response.message)
+                    return
+                }
+            }else if(!isLogged && !selectedHabbit){
+                const response = storeLocalHabbit({
+                    name: habbitName,
+                    description: habbitDescription,
+                    color: habbitColor,
+                    maxRepetitions: habbitMaxReps,
+                    frequency: habbitFrequency ?? 'DAY',
+                    token: undefined
+                })
+                if (response.status === HTTP_CREATED_CODE && handleAddHabbit) {
+                    handleAddHabbit(response.data)
+                    handleChangeModalStatus(false)
+                    toast(response.message)
+                    return
+                }
             }
-
         } catch (error) {
-            // TODO
+            handleChangeModalStatus(false)  
+            toast.error(error instanceof Error ? error.message : HTTP_GENERAL_ERROR_MSG)
         }
     }
 
