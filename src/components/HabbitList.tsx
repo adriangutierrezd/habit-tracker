@@ -5,6 +5,8 @@ import { storeLocalHabbitRecord, storeRemoteHabbitRecord, updateRemoteHabbitReco
 import { useSelector } from "react-redux";
 import { RootState } from "../store";
 import moment from "moment";
+import { Heatmap } from "./Heatmap";
+import { getDataForHeatmap } from "../utils";
 
 
 const isHabbitCompleted = (habbit: Habbit, date: string) => {
@@ -15,7 +17,6 @@ const isHabbitCompleted = (habbit: Habbit, date: string) => {
 interface Props {
     readonly habbits: Habbit[]
     readonly handleUpdateHabbit: (data: Habbit, id: string) => void;
-    readonly handleAddHabbit: (data: Habbit) => void;
 }
 
 
@@ -26,7 +27,7 @@ interface HandleStoreRecordProps {
 }
 
 
-export default function HabbitList({ habbits, handleUpdateHabbit, handleAddHabbit }: Props) {
+export default function HabbitList({ habbits, handleUpdateHabbit }: Props) {
 
     const { isLogged, token } = useSelector((state: RootState) => {
         return state.userSession
@@ -39,7 +40,7 @@ export default function HabbitList({ habbits, handleUpdateHabbit, handleAddHabbi
             handleUpdateHabbit(habit, habit.id)
         } else if (habbit.records && habbit.records.length > 0) {
             const findRecord = habbit.records.find((record: HabbitRecord) => record.date === date)
-            if (findRecord) {
+            if (findRecord?.id) {
                 const response = await updateRemoteHabbitRecord({ habbitRecordId: findRecord.id, repetitions: findRecord.repetitions + 1, token: token ?? undefined })
                 const habit = response.data as Habbit
                 handleUpdateHabbit(habit, habit.id)
@@ -58,7 +59,6 @@ export default function HabbitList({ habbits, handleUpdateHabbit, handleAddHabbi
     return (
         <>
             {habbits.map((habbit: Habbit) => {
-
                 const trigger = <div
                     key={habbit.id}
                     className="card w-full bg-base-100 shadow-xl my-3 cursor-pointer">
@@ -71,6 +71,9 @@ export default function HabbitList({ habbits, handleUpdateHabbit, handleAddHabbi
                                 <h2 className="card-title text-base sm:text-lg">{habbit.name}</h2>
                             </div>
                             <HabbitButton habbit={habbit} handleStoreRecord={handleStoreRecord} />
+                        </div>
+                        <div className="overflow-x-auto">
+                            <Heatmap color={habbit.color} maxValue={habbit.maxRepetitions} data={getDataForHeatmap(habbit.records ?? [])} width={500} height={150} />
                         </div>
                     </div>
                 </div>

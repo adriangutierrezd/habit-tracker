@@ -33,3 +33,5 @@ export interface Habbit {
     maxRepetitions: number;
     records?: HabbitRecord[];
 }
+
+export type HeatmapData = { x: string; y: string; value: number }[];

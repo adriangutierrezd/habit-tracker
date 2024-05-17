@@ -96,10 +96,9 @@ export default function HomePage() {
                     </div>
                     <h1 className="flex-1 font-semibold text-lg sm:text-2xl">Habit Tracker</h1>
                 </div>
-                <HabbitModal selectedHabbit={undefined} handleUpdateHabbit={handleUpdateHabbit} handleAddHabbit={handleAddHabbit} />
+                <HabbitModal selectedHabbit={undefined} handleUpdateHabbit={handleUpdateHabbit} />
             </header>
             <main className="py-2 px-4">
-
                 {(!isLogged && showAccountBanner) && (
                     <div role="alert" className="alert mb-4">
                         <article>
@@ -140,7 +139,7 @@ export default function HomePage() {
                 ) : (
                     <>
                         {habbits.length > 0 ? (
-                            <HabbitList handleAddHabbit={handleAddHabbit} handleUpdateHabbit={handleUpdateHabbit} habbits={habbits} />
+                            <HabbitList handleUpdateHabbit={handleUpdateHabbit} habbits={habbits} />
                         ) : (
                             <div className="border border-dashed p-6 border-2 flex items-center justify-center flex-col space-y-4 rounded">
                                 <h2 className="font-semibold text-md sm:text-xl">Aún no has añadido ningún hábito</h2>
