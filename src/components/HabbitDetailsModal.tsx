@@ -1,13 +1,15 @@
 import React, { MouseEvent } from "react";
 import { Habbit } from "../types";
 import { Calendar, CirclePlus, Pencil, Trash } from "lucide-react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../store";
 import { Heatmap } from "./Heatmap";
-import { getDataForHeatmap } from "../utils";
+import { getDataForHeatmap, handleChangeModalStatus } from "../utils";
 import { HTTP_GENERAL_ERROR_MSG } from "../constants";
 import { toast } from 'sonner'
 import { deleteRemoteHabit } from "../services/habbitsService";
+import HabbitModal from "./HabbitModal";
+import { removeHabit } from "../slices/habitsSlice";
 
 const MODAL_ID = 'HabbitModal'
 
@@ -18,26 +20,16 @@ const defaultTrigger = <button className="btn modal-trigger" >
 interface Props {
     readonly modalTrigger?: JSX.Element;
     readonly modalId?: string;
-    readonly handleDeleteHabit: (habitId: string) => void;
     readonly selectedHabbit: Habbit;
 }
 
-export default function HabbitDetailsModal({ handleDeleteHabit, modalId = MODAL_ID, modalTrigger = defaultTrigger, selectedHabbit }: Props) {
+export default function HabbitDetailsModal({ modalId = MODAL_ID, modalTrigger = defaultTrigger, selectedHabbit }: Props) {
 
+    const dispatch = useDispatch()
     const { isLogged, token } = useSelector((state: RootState) => {
         return state.userSession
     });
 
-    const handleChangeModalStatus = (status: boolean, modal: string) => {
-        const modalElement = document.getElementById(modal) as HTMLDialogElement | null;
-        if (modalElement) {
-            if (status) {
-                modalElement.showModal()
-            } else {
-                modalElement.close()
-            }
-        }
-    }
 
     const handleOpenModal = (event: MouseEvent<HTMLButtonElement | HTMLDivElement>) => {
         const target = event.target as HTMLElement;
@@ -46,16 +38,16 @@ export default function HabbitDetailsModal({ handleDeleteHabit, modalId = MODAL_
         }
     }
 
-    const deleteHabit = async() => {
+    const deleteHabit = async () => {
         try {
-            if(isLogged){
+            if (isLogged) {
                 await deleteRemoteHabit({
                     token: token ?? '',
                     habitId: selectedHabbit.id
                 })
             }
-            
-            handleDeleteHabit(selectedHabbit.id)
+
+            dispatch(removeHabit(selectedHabbit.id))
             handleChangeModalStatus(false, `delete_${selectedHabbit.id}_habit_modal`)
             handleChangeModalStatus(false, modalId)
         } catch (error) {
@@ -82,9 +74,10 @@ export default function HabbitDetailsModal({ handleDeleteHabit, modalId = MODAL_
                         <button className="btn btn-ghost">
                             <Calendar className="h-4 w-4" />
                         </button>
-                        <button className="btn btn-ghost">
-                            <Pencil className="h-4 w-4" />
-                        </button>
+                        <HabbitModal selectedHabbit={selectedHabbit} modalTrigger={<button className="btn modal-trigger btn-ghost">
+                            <Pencil className="h-4 w-4 modal-trigger" />
+                        </button>} 
+                        modalId={`modal_edit_${selectedHabbit.id}`} />
                     </div>
                 </div>
                 <form method="dialog" className="modal-backdrop">

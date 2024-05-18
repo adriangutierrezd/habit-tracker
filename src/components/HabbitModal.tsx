@@ -2,10 +2,11 @@ import React, { MouseEvent, useState } from "react";
 import { AVAILABLE_COLORS, HABIT_FREQUENCY, HTTP_CREATED_CODE, HTTP_GENERAL_ERROR_MSG, HTTP_OK_CODE } from "../constants";
 import { BasicOption, Habbit, HabbitFrequencies } from "../types";
 import { CirclePlus, Minus, Plus } from "lucide-react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../store";
 import { storeLocalHabbit, storeRemoteHabbit, updateLocalHabbit, updateRemoteHabbit } from "../services/habbitsService";
 import { toast } from 'sonner'
+import { addHabit, updateHabit } from "../slices/habitsSlice";
 
 const MODAL_ID = 'HabbitModal'
 
@@ -14,15 +15,14 @@ const defaultTrigger = <button className="btn modal-trigger" >
 </button>
 
 interface Props {
-    readonly handleAddHabbit?: (data: Habbit) => void;
-    readonly handleUpdateHabbit?: (data: Habbit, id: string) => void;
     readonly modalTrigger?: JSX.Element;
     readonly modalId?: string;
     readonly selectedHabbit: Habbit | undefined;
 }
 
-export default function HabbitModal({ handleAddHabbit, modalId = MODAL_ID, modalTrigger = defaultTrigger, selectedHabbit = undefined, handleUpdateHabbit }: Props) {
+export default function HabbitModal({ modalId = MODAL_ID, modalTrigger = defaultTrigger, selectedHabbit = undefined }: Props) {
 
+    const dispatch = useDispatch()
     const [habbitName, setHabbitName] = useState<string>('')
     const [habbitDescription, setHabbitDescription] = useState<string>('')
     const [habbitFrequency, setHabbitFrequency] = useState<HabbitFrequencies>('DAY')
@@ -141,10 +141,9 @@ export default function HabbitModal({ handleAddHabbit, modalId = MODAL_ID, modal
                     id: selectedHabbit.id
                 })
 
-                if (handleUpdateHabbit) {
-                    const habit = response.data as Habbit
-                    handleUpdateHabbit(habit, habit.id)
-                }
+
+                const habit = response.data as Habbit
+                dispatch(updateHabit({habit, id: habit.id}))
                 handleChangeModalStatus(false)
                 toast(response.message)
                 return
@@ -158,10 +157,8 @@ export default function HabbitModal({ handleAddHabbit, modalId = MODAL_ID, modal
                     token: token ?? undefined
                 })
 
-                if (handleAddHabbit) {
-                    const habit = response.data as Habbit
-                    handleAddHabbit(habit)
-                }
+                const habit = response.data as Habbit
+                dispatch(addHabit(habit))
                 handleChangeModalStatus(false)
                 toast(response.message)
                 return
@@ -176,9 +173,9 @@ export default function HabbitModal({ handleAddHabbit, modalId = MODAL_ID, modal
                     token: undefined
                 })
 
-                if (response.status === HTTP_OK_CODE && handleUpdateHabbit) {
-                    const habbit = response.data as Habbit
-                    handleUpdateHabbit(habbit, selectedHabbit.id)
+                if (response.status === HTTP_OK_CODE) {
+                    const habit = response.data as Habbit
+                    dispatch(updateHabit({habit, id: habit.id}))
                     handleChangeModalStatus(false)
                     toast(response.message)
                     return
@@ -192,8 +189,9 @@ export default function HabbitModal({ handleAddHabbit, modalId = MODAL_ID, modal
                     frequency: habbitFrequency ?? 'DAY',
                     token: undefined
                 })
-                if (response.status === HTTP_CREATED_CODE && handleAddHabbit) {
-                    handleAddHabbit(response.data)
+                if (response.status === HTTP_CREATED_CODE) {
+                    const habit = response.data as Habbit
+                    dispatch(addHabit(habit))
                     handleChangeModalStatus(false)
                     toast(response.message)
                     return

@@ -64,7 +64,8 @@ export const hexToRgba = (hex: string, alpha: number) => {
     for (let x = 0; x < nCol; x++) {
         for (let y = 0; y < nRow; y++) {
           counter++;
-          const value = trimmedRecords[counter].repetitions === 0 ? 0.01 : trimmedRecords[counter].repetitions
+          const record = trimmedRecords[counter];
+          const value = record ? (record.repetitions === 0 ? 0.01 : record.repetitions) : 0.01;
           data.push({
             x: alphabet[x],
             y: alphabet[y],
@@ -75,3 +76,14 @@ export const hexToRgba = (hex: string, alpha: number) => {
 
       return data
   }
+
+  export const handleChangeModalStatus = (status: boolean, modal: string) => {
+    const modalElement = document.getElementById(modal) as HTMLDialogElement | null;
+    if (modalElement) {
+        if (status) {
+            modalElement.showModal()
+        } else {
+            modalElement.close()
+        }
+    }
+}

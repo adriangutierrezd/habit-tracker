@@ -1,9 +1,7 @@
-import { CirclePlus, Info, Settings, X } from "lucide-react";
+import { Info, Settings, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { themeChange } from 'theme-change'
 import HabbitModal from "./HabbitModal";
-import { getLocalHabbits, getRemoteHabbits } from "../services/habbitsService";
-import { Habbit } from "../types";
 import HabbitList from "./HabbitList";
 import { Toaster } from "sonner";
 import { useSelector } from "react-redux";
@@ -12,59 +10,27 @@ import SignUpModal from "./SignUpModal";
 
 export default function HomePage() {
 
-    useEffect(() => {
-        themeChange(false)
-    }, [])
-
-    const { isLogged, token } = useSelector((state: RootState) => {
+    const [showAccountBanner, setShowAccountBanner] = useState<boolean>(false)
+    const { isLogged } = useSelector((state: RootState) => {
         return state.userSession
     });
-    const [habbits, setHabbits] = useState<Array<Habbit>>([])
-    const [isLoading, setIsLoading] = useState<boolean>(true)
-    const [showAccountBanner, setShowAccountBanner] = useState<boolean>(false)
 
-    const handleAddHabbit = (data: Habbit) => {
-        setHabbits([...habbits, data])
-    }
-
-    const fetchHabbits = async () => {
-        setIsLoading(true)
-        if (!isLogged) {
-            setHabbits(getLocalHabbits().data)
-            setIsLoading(false)
-        } else {
-            try {
-                const response = await getRemoteHabbits(token ?? '')
-                setHabbits(response.data)
-                setIsLoading(false)
-            } catch (error) {
-                // TODO
-            }
-        }
-    }
 
     useEffect(() => {
-        fetchHabbits()
         const hideBanner = window.localStorage.getItem('hide-account-banner')
         if (!hideBanner) {
             setShowAccountBanner(true)
         }
     }, [])
 
-    const handleUpdateHabbit = (data: Habbit, id: string) => {
-        const newHabbits = structuredClone(habbits)
-        const habbitIndex = newHabbits.findIndex((habbit: Habbit) => habbit.id == id)
-        newHabbits[habbitIndex] = data
-        setHabbits(newHabbits)
-    }
+    useEffect(() => {
+        themeChange(false)
+    }, [])
+
 
     const handleCloseAccountBanner = () => {
         window.localStorage.setItem('hide-account-banner', '1')
         setShowAccountBanner(false)
-    }
-
-    const handleDeleteHabit = (habitId: string) => {
-        setHabbits(habbits.filter((habit: Habbit) => habit.id !== habitId))
     }
 
     return (
@@ -99,7 +65,7 @@ export default function HomePage() {
                     </div>
                     <h1 className="flex-1 font-semibold text-lg sm:text-2xl">Habit Tracker</h1>
                 </div>
-                <HabbitModal selectedHabbit={undefined} handleUpdateHabbit={handleUpdateHabbit} />
+                <HabbitModal selectedHabbit={undefined} />
             </header>
             <main className="py-2 px-4">
                 {(!isLogged && showAccountBanner) && (
@@ -133,30 +99,7 @@ export default function HomePage() {
                     </div>
                 )}
 
-                {isLoading ? (
-                    <div className="flex flex-col space-y-4">
-                        <div className="skeleton w-full h-32"></div>
-                        <div className="skeleton w-full h-32"></div>
-                        <div className="skeleton w-full h-32"></div>
-                    </div>
-                ) : (
-                    <>
-                        {habbits.length > 0 ? (
-                            <HabbitList handleDeleteHabit={handleDeleteHabit} handleUpdateHabbit={handleUpdateHabbit} habbits={habbits} />
-                        ) : (
-                            <div className="border border-dashed p-6 border-2 flex items-center justify-center flex-col space-y-4 rounded">
-                                <h2 className="font-semibold text-md sm:text-xl">Aún no has añadido ningún hábito</h2>
-                                <p>Guardaremos todos los hábitos que crees en esta plataforma junto con tu seguimento</p>
-                                <HabbitModal modalId="firstHabbitModal" selectedHabbit={undefined} handleAddHabbit={handleAddHabbit} modalTrigger={
-                                    <button className="btn btn-primary modal-trigger">
-                                        <CirclePlus className="h-4 w-4 modal-trigger" />
-                                        Añadir
-                                    </button>
-                                } />
-                            </div>
-                        )}
-                    </>
-                )}
+                <HabbitList />
 
                 <Toaster richColors={true} className="z-100" />
             </main>

@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit'
 import userReducer from './slices/userSlice'
+import habitReducer from './slices/habitsSlice'
 
 export const store = configureStore({
   reducer: {
-    userSession: userReducer
+    userSession: userReducer,
+    userHabits: habitReducer
   },
 })
 
