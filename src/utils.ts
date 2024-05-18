@@ -1,4 +1,4 @@
-import { HabbitRecord, HeatmapData } from "./types";
+import { HabitRecord, HeatmapData } from "./types";
 
 export const getHeaders = (token: string | null): Headers => {
     const myHeaders = new Headers();
@@ -53,7 +53,7 @@ export const hexToRgba = (hex: string, alpha: number) => {
     "Z",
   ];
 
-  export const getDataForHeatmap = (records: HabbitRecord[]) => {
+  export const getDataForHeatmap = (records: HabitRecord[]) => {
 
     const trimmedRecords = records.slice(-364)
 

@@ -1,8 +1,8 @@
 import { Info, Settings, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { themeChange } from 'theme-change'
-import HabbitModal from "./HabbitModal";
-import HabbitList from "./HabbitList";
+import HabitModal from "./HabitModal";
+import HabitList from "./HabitList";
 import { Toaster } from "sonner";
 import { useSelector } from "react-redux";
 import { RootState } from "../store";
@@ -65,7 +65,7 @@ export default function HomePage() {
                     </div>
                     <h1 className="flex-1 font-semibold text-lg sm:text-2xl">Habit Tracker</h1>
                 </div>
-                <HabbitModal selectedHabbit={undefined} />
+                <HabitModal selectedHabit={undefined} />
             </header>
             <main className="py-2 px-4">
                 {(!isLogged && showAccountBanner) && (
@@ -99,7 +99,7 @@ export default function HomePage() {
                     </div>
                 )}
 
-                <HabbitList />
+                <HabitList />
 
                 <Toaster richColors={true} className="z-100" />
             </main>

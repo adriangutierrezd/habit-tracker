@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
-import { Habbit, HabbitFrequencies } from '../types';
-import { HABBIT_STORAGE_KEY, HTTP_CREATED_CODE, HTTP_CREATED_MSG, HTTP_DELETED_MSG, HTTP_FETCHED_MSG, HTTP_GENERAL_ERROR_MSG, HTTP_NOT_FOUND_CODE, HTTP_NOT_FOUND_MSG, HTTP_OK_CODE, HTTP_UPDATED_MSG } from '../constants';
+import { Habit, HabitFrequencies } from '../types';
+import { HABIT_STORAGE_KEY, HTTP_CREATED_CODE, HTTP_CREATED_MSG, HTTP_DELETED_MSG, HTTP_FETCHED_MSG, HTTP_GENERAL_ERROR_MSG, HTTP_NOT_FOUND_CODE, HTTP_NOT_FOUND_MSG, HTTP_OK_CODE, HTTP_UPDATED_MSG } from '../constants';
 import { getHeaders } from '../utils';
 
 interface StoringProps {
@@ -8,7 +8,7 @@ interface StoringProps {
     description: string | null,
     color: string,
     maxRepetitions: number,
-    frequency: HabbitFrequencies,
+    frequency: HabitFrequencies,
     token: string | undefined
 }
 
@@ -18,12 +18,12 @@ interface UpdatingProps {
     description: string | null,
     color: string,
     maxRepetitions: number,
-    frequency: HabbitFrequencies,
+    frequency: HabitFrequencies,
     token: string | undefined
 }
 
-export const storeLocalHabbit = ({name, description, color, maxRepetitions, frequency}: StoringProps) => {
-    const habbitData = {
+export const storeLocalHabit = ({name, description, color, maxRepetitions, frequency}: StoringProps) => {
+    const habitData = {
         id: uuidv4(),
         name,
         description,
@@ -33,33 +33,33 @@ export const storeLocalHabbit = ({name, description, color, maxRepetitions, freq
         records: []
     }
 
-    const localHabbits = window.localStorage.getItem(HABBIT_STORAGE_KEY)
-    if(!localHabbits){
-        window.localStorage.setItem(HABBIT_STORAGE_KEY, JSON.stringify([habbitData]))
+    const localHabits = window.localStorage.getItem(HABIT_STORAGE_KEY)
+    if(!localHabits){
+        window.localStorage.setItem(HABIT_STORAGE_KEY, JSON.stringify([habitData]))
     }else{
-        const dataHabbits = JSON.parse(localHabbits)
-        window.localStorage.setItem(HABBIT_STORAGE_KEY, JSON.stringify([...dataHabbits, habbitData]))
+        const dataHabits = JSON.parse(localHabits)
+        window.localStorage.setItem(HABIT_STORAGE_KEY, JSON.stringify([...dataHabits, habitData]))
     }
 
     return {
         status: HTTP_CREATED_CODE,
-        data: habbitData,
+        data: habitData,
         message: HTTP_CREATED_MSG
     }
 
 }
 
-export const deleteLocalHabbit = ({habbitId}: {habbitId: string}) => {
-    const localHabbits = window.localStorage.getItem(HABBIT_STORAGE_KEY)
-    if(!localHabbits){
+export const deleteLocalHabit = ({habitId}: {habitId: string}) => {
+    const localHabits = window.localStorage.getItem(HABIT_STORAGE_KEY)
+    if(!localHabits){
         return {
             status: HTTP_NOT_FOUND_CODE,
             data: [],
             message: HTTP_NOT_FOUND_MSG
         }
     }else{
-        const dataHabbits = JSON.parse(localHabbits)
-        window.localStorage.setItem(HABBIT_STORAGE_KEY, JSON.stringify(dataHabbits.filter((dHabbit: any) => dHabbit.id !== habbitId )))
+        const dataHabits = JSON.parse(localHabits)
+        window.localStorage.setItem(HABIT_STORAGE_KEY, JSON.stringify(dataHabits.filter((dHabit: any) => dHabit.id !== habitId )))
         return {
             status: HTTP_OK_CODE,
             data: [],
@@ -68,18 +68,18 @@ export const deleteLocalHabbit = ({habbitId}: {habbitId: string}) => {
     }
 }
 
-export const getLocalHabbits = () => {
-    const localHabbits = window.localStorage.getItem(HABBIT_STORAGE_KEY)
+export const getLocalHabits = () => {
+    const localHabits = window.localStorage.getItem(HABIT_STORAGE_KEY)
     return {
         status: HTTP_OK_CODE,
-        data: localHabbits ? JSON.parse(localHabbits) : [],
+        data: localHabits ? JSON.parse(localHabits) : [],
         message: HTTP_FETCHED_MSG
     }
 }
 
-export const updateLocalHabbit = ({name, description, color, maxRepetitions, frequency, id}: UpdatingProps) => {
+export const updateLocalHabit = ({name, description, color, maxRepetitions, frequency, id}: UpdatingProps) => {
     
-    const habbitData = {
+    const habitData = {
         id,
         name,
         description,
@@ -88,8 +88,8 @@ export const updateLocalHabbit = ({name, description, color, maxRepetitions, fre
         frequency
     }
 
-    const localHabbits = window.localStorage.getItem(HABBIT_STORAGE_KEY)
-    if(!localHabbits){
+    const localHabits = window.localStorage.getItem(HABIT_STORAGE_KEY)
+    if(!localHabits){
         return {
             status: HTTP_NOT_FOUND_CODE,
             data: [],
@@ -97,9 +97,9 @@ export const updateLocalHabbit = ({name, description, color, maxRepetitions, fre
         }
     }
 
-    const dataHabbits = JSON.parse(localHabbits)
-    const habbitIndex = dataHabbits.findIndex((habbit: Habbit) => habbit.id == id)
-    if(habbitIndex === -1){
+    const dataHabits = JSON.parse(localHabits)
+    const habitIndex = dataHabits.findIndex((habit: Habit) => habit.id == id)
+    if(habitIndex === -1){
         return {
             status: HTTP_NOT_FOUND_CODE,
             data: [],
@@ -107,18 +107,18 @@ export const updateLocalHabbit = ({name, description, color, maxRepetitions, fre
         }
     }
 
-    dataHabbits[habbitIndex] = habbitData
-    window.localStorage.setItem(HABBIT_STORAGE_KEY, JSON.stringify(dataHabbits))
+    dataHabits[habitIndex] = habitData
+    window.localStorage.setItem(HABIT_STORAGE_KEY, JSON.stringify(dataHabits))
 
     return {
         status: HTTP_OK_CODE,
-        data: habbitData,
+        data: habitData,
         message: HTTP_UPDATED_MSG
     }
 
 }
 
-export const storeRemoteHabbit = async({name, description, color, maxRepetitions, frequency, token}: StoringProps) => {
+export const storeRemoteHabit = async({name, description, color, maxRepetitions, frequency, token}: StoringProps) => {
     try{
 
         const myHeaders = getHeaders(token ?? null)
@@ -142,7 +142,7 @@ export const storeRemoteHabbit = async({name, description, color, maxRepetitions
     }
 }
 
-export const updateRemoteHabbit = async({name, description, color, maxRepetitions, frequency, token, id}: UpdatingProps) => {
+export const updateRemoteHabit = async({name, description, color, maxRepetitions, frequency, token, id}: UpdatingProps) => {
     try{
 
         const myHeaders = getHeaders(token ?? null)
@@ -166,7 +166,7 @@ export const updateRemoteHabbit = async({name, description, color, maxRepetition
     }
 }
 
-export const getRemoteHabbits = async (token: string) => {
+export const getRemoteHabits = async (token: string) => {
     try{
 
         const myHeaders = getHeaders(token ?? null)

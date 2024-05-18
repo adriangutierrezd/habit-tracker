@@ -4,7 +4,7 @@ export interface UserData {
     email: string;
 }
 
-export type HabbitFrequencies = 'DAY' | 'WEEK' | 'MONTH' | 'FORTNIGHT';
+export type HabitFrequencies = 'DAY' | 'WEEK' | 'MONTH' | 'FORTNIGHT';
 
 export interface UserSession {
     token: string | null;
@@ -17,21 +17,21 @@ export interface BasicOption {
     value: string;
 }
 
-export interface HabbitRecord {
+export interface HabitRecord {
     id: string;
-    habbitId: string;
+    habitId: string;
     date: string;
     repetitions: number;
 }
 
-export interface Habbit {
+export interface Habit {
     id: string;
     name: string;
     description: string | null;
     color: string;
-    frequency: HabbitFrequencies;
+    frequency: HabitFrequencies;
     maxRepetitions: number;
-    records?: HabbitRecord[];
+    records?: HabitRecord[];
 }
 
 export type HeatmapData = { x: string; y: string; value: number }[];

@@ -1,8 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { Habbit } from '../types';
+import { Habit } from '../types';
 
 interface HabitsSlice {
-    habits: Habbit[]
+    habits: Habit[]
 }
 
 const defaultInitialState: HabitsSlice = {
@@ -35,15 +35,15 @@ export const habitSlice = createSlice({
     },
     removeHabit: (state, data) => {
         const { payload } = data
-        state.habits = state.habits.filter((habit: Habbit) => habit.id !== payload)
+        state.habits = state.habits.filter((habit: Habit) => habit.id !== payload)
         window.localStorage.setItem('userHabits', JSON.stringify(state))
     },
     updateHabit: (state, data) => {
         const { payload } = data
-        const newHabbits = state.habits
-        const habbitIndex = newHabbits.findIndex((habbit: Habbit) => habbit.id == payload.id)
-        newHabbits[habbitIndex] = payload.habit
-        state.habits = newHabbits
+        const newHabits = state.habits
+        const habitIndex = newHabits.findIndex((habit: Habit) => habit.id == payload.id)
+        newHabits[habitIndex] = payload.habit
+        state.habits = newHabits
         window.localStorage.setItem('userHabits', JSON.stringify(state))
     }
   },
