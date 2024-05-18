@@ -63,6 +63,9 @@ export default function HomePage() {
         setShowAccountBanner(false)
     }
 
+    const handleDeleteHabit = (habitId: string) => {
+        setHabbits(habbits.filter((habit: Habbit) => habit.id !== habitId))
+    }
 
     return (
         <>
@@ -139,7 +142,7 @@ export default function HomePage() {
                 ) : (
                     <>
                         {habbits.length > 0 ? (
-                            <HabbitList handleUpdateHabbit={handleUpdateHabbit} habbits={habbits} />
+                            <HabbitList handleDeleteHabit={handleDeleteHabit} handleUpdateHabbit={handleUpdateHabbit} habbits={habbits} />
                         ) : (
                             <div className="border border-dashed p-6 border-2 flex items-center justify-center flex-col space-y-4 rounded">
                                 <h2 className="font-semibold text-md sm:text-xl">Aún no has añadido ningún hábito</h2>

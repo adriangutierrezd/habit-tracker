@@ -10,11 +10,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@mui/material": "^5.15.18",
+    "@mui/styled-engine-sc": "^6.0.0-alpha.18",
+    "@mui/x-date-pickers": "^7.5.0",
     "@reduxjs/toolkit": "^2.2.3",
     "@syncfusion/ej2-react-heatmap": "^25.1.35",
     "@types/react-redux": "^7.1.33",
     "@uiw/react-heat-map": "^2.2.2",
     "d3": "^7.9.0",
+    "dayjs": "^1.11.11",
     "localforage": "^1.10.0",
     "lucide-react": "^0.378.0",
     "match-sorter": "^6.3.4",
@@ -25,6 +31,7 @@
     "react-router-dom": "^6.23.0",
     "sonner": "^1.4.41",
     "sort-by": "^1.2.0",
+    "styled-components": "^6.1.11",
     "theme-change": "^2.5.0",
     "uuid": "^9.0.1"
   },

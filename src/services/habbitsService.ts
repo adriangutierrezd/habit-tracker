@@ -186,3 +186,24 @@ export const getRemoteHabbits = async (token: string) => {
         throw new Error(error instanceof Error ? error.message : HTTP_GENERAL_ERROR_MSG)
     }
 }
+
+export const deleteRemoteHabit = async ({token, habitId}: { token: string, habitId: string }) => {
+    try{
+
+        const myHeaders = getHeaders(token ?? null)
+
+        const requestOptions: RequestInit = {
+            method: 'DELETE',
+            headers: myHeaders,
+            redirect: 'follow'
+        };
+    
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/habits/${habitId}`, requestOptions)
+        const data = await response.json()
+        if(data.status !== HTTP_OK_CODE) throw new Error(data.message)
+        return data
+
+    }catch(error){
+        throw new Error(error instanceof Error ? error.message : HTTP_GENERAL_ERROR_MSG)
+    }
+}

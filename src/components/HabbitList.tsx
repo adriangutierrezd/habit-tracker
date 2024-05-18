@@ -7,6 +7,7 @@ import { RootState } from "../store";
 import moment from "moment";
 import { Heatmap } from "./Heatmap";
 import { getDataForHeatmap } from "../utils";
+import HabbitDetailsModal from "./HabbitDetailsModal";
 
 
 const isHabbitCompleted = (habbit: Habbit, date: string) => {
@@ -17,6 +18,7 @@ const isHabbitCompleted = (habbit: Habbit, date: string) => {
 interface Props {
     readonly habbits: Habbit[]
     readonly handleUpdateHabbit: (data: Habbit, id: string) => void;
+    readonly handleDeleteHabit: (habitId: string) => void;
 }
 
 
@@ -27,7 +29,7 @@ interface HandleStoreRecordProps {
 }
 
 
-export default function HabbitList({ habbits, handleUpdateHabbit }: Props) {
+export default function HabbitList({ habbits, handleUpdateHabbit, handleDeleteHabit }: Props) {
 
     const { isLogged, token } = useSelector((state: RootState) => {
         return state.userSession
@@ -79,7 +81,7 @@ export default function HabbitList({ habbits, handleUpdateHabbit }: Props) {
                 </div>
 
                 return (
-                    <HabbitModal selectedHabbit={habbit} key={habbit.id} modalTrigger={trigger} modalId={`modal_${habbit.id}`} handleUpdateHabbit={handleUpdateHabbit} />
+                    <HabbitDetailsModal handleDeleteHabit={handleDeleteHabit} selectedHabbit={habbit} key={habbit.id} modalTrigger={trigger} modalId={`modal_${habbit.id}`} />
                 )
             })}
         </>

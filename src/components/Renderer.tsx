@@ -36,7 +36,7 @@ export const Renderer = ({
       .scaleBand()
       .range([0, boundsWidth])
       .domain(allXGroups)
-      .padding(0.03);
+      .padding(0.07);
   }, [data, width]);
 
   const yScale = useMemo(() => {
@@ -44,7 +44,7 @@ export const Renderer = ({
       .scaleBand()
       .range([boundsHeight, 0])
       .domain(allYGroups)
-      .padding(0.03);
+      .padding(0.07);
   }, [data, height]);
 
 
