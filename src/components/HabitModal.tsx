@@ -1,12 +1,15 @@
 import React, { MouseEvent, useState } from "react";
-import { AVAILABLE_COLORS, HABIT_FREQUENCY, HTTP_CREATED_CODE, HTTP_GENERAL_ERROR_MSG, HTTP_OK_CODE } from "../constants";
+import { addHabit, updateHabit } from "../slices/habitsSlice";
+import { AVAILABLE_COLORS, HABIT_FREQUENCY, HTTP_GENERAL_ERROR_MSG } from "../constants";
 import { BasicOption, Habit, HabitFrequencies } from "../types";
 import { CirclePlus, Minus, Plus } from "lucide-react";
-import { useSelector, useDispatch } from "react-redux";
+import { generatePastRecords } from "../utils";
 import { RootState } from "../store";
-import { storeLocalHabit, storeRemoteHabit, updateLocalHabit, updateRemoteHabit } from "../services/habitsService";
+import { storeRemoteHabit, updateRemoteHabit } from "../services/habitsService";
 import { toast } from 'sonner'
-import { addHabit, updateHabit } from "../slices/habitsSlice";
+import { useSelector, useDispatch } from "react-redux";
+import { v4 as uuidv4 } from 'uuid';
+import moment from "moment";
 
 const MODAL_ID = 'HabitModal'
 
@@ -130,7 +133,7 @@ export default function HabitModal({ modalId = MODAL_ID, modalTrigger = defaultT
                 return
             }
 
-            if(isLogged && selectedHabit){
+            if (isLogged && selectedHabit) {
                 const response = await updateRemoteHabit({
                     name: habitName,
                     description: habitDescription,
@@ -143,11 +146,11 @@ export default function HabitModal({ modalId = MODAL_ID, modalTrigger = defaultT
 
 
                 const habit = response.data as Habit
-                dispatch(updateHabit({habit, id: habit.id}))
+                dispatch(updateHabit({ habit, id: habit.id }))
                 handleChangeModalStatus(false)
                 toast(response.message)
                 return
-            }else if(isLogged && !selectedHabit){
+            } else if (isLogged && !selectedHabit) {
                 const response = await storeRemoteHabit({
                     name: habitName,
                     description: habitDescription,
@@ -162,43 +165,40 @@ export default function HabitModal({ modalId = MODAL_ID, modalTrigger = defaultT
                 handleChangeModalStatus(false)
                 toast(response.message)
                 return
-            }else if(!isLogged && selectedHabit){
-                const response = updateLocalHabit({
-                    id: selectedHabit.id,
-                    name: habitName,
-                    description: habitDescription,
-                    color: habitColor,
-                    maxRepetitions: habitMaxReps,
-                    frequency: habitFrequency ?? 'DAY',
-                    token: undefined
-                })
+            } else if (!isLogged && selectedHabit) {
 
-                if (response.status === HTTP_OK_CODE) {
-                    const habit = response.data as Habit
-                    dispatch(updateHabit({habit, id: habit.id}))
-                    handleChangeModalStatus(false)
-                    toast(response.message)
-                    return
-                }
-            }else if(!isLogged && !selectedHabit){
-                const response = storeLocalHabit({
+                const newHabit: Habit = {
+                    ...selectedHabit,
                     name: habitName,
                     description: habitDescription,
                     color: habitColor,
                     maxRepetitions: habitMaxReps,
                     frequency: habitFrequency ?? 'DAY',
-                    token: undefined
-                })
-                if (response.status === HTTP_CREATED_CODE) {
-                    const habit = response.data as Habit
-                    dispatch(addHabit(habit))
-                    handleChangeModalStatus(false)
-                    toast(response.message)
-                    return
                 }
+
+
+                dispatch(updateHabit({ habit: newHabit, id: newHabit.id }))
+                handleChangeModalStatus(false)
+                toast('Recurso actualizado con éxito')
+                return
+            } else if (!isLogged && !selectedHabit) {
+                const newHabitId = uuidv4()
+                const newHabit: Habit = {
+                    id: newHabitId,
+                    name: habitName,
+                    description: habitDescription,
+                    color: habitColor,
+                    maxRepetitions: habitMaxReps,
+                    frequency: habitFrequency ?? 'DAY',
+                    records: generatePastRecords(moment().format('YYYY-MM-DD'), newHabitId)
+                }
+                dispatch(addHabit(newHabit))
+                handleChangeModalStatus(false)
+                toast('Recurso añadido con éxito')
+                return
             }
         } catch (error) {
-            handleChangeModalStatus(false)  
+            handleChangeModalStatus(false)
             toast.error(error instanceof Error ? error.message : HTTP_GENERAL_ERROR_MSG)
         }
     }

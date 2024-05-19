@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { login } from "../slices/userSlice";
 import { RootState } from "../store";
 import { signUp } from "../services/usersService";
-import { login } from "../slices/userSlice";
+import { useSelector, useDispatch } from "react-redux";
 
 const MODAL_ID = 'signInModal'
 

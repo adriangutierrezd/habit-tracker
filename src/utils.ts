@@ -1,4 +1,6 @@
+import moment from "moment";
 import { HabitRecord, HeatmapData } from "./types";
+import { v4 as uuidv4 } from 'uuid';
 
 export const getHeaders = (token: string | null): Headers => {
     const myHeaders = new Headers();
@@ -86,4 +88,18 @@ export const hexToRgba = (hex: string, alpha: number) => {
             modalElement.close()
         }
     }
+}
+
+export const generatePastRecords = (initialDate: string, habitId: string) => {
+  const records: HabitRecord[] = []
+  for(let i = 0; i <= 365; i++){
+    const newDate = moment(initialDate, 'YYYY-MM-DD').subtract(i, 'days')
+    records.push({
+      id: uuidv4(),
+      habitId,
+      date: newDate.format('YYYY-MM-DD'),
+      repetitions: 0
+    })
+  }
+  return records.reverse()
 }

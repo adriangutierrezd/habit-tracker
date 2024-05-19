@@ -1,15 +1,15 @@
 import React, { MouseEvent } from "react";
-import { Habit } from "../types";
 import { Calendar, CirclePlus, Pencil, Trash } from "lucide-react";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "../store";
-import { Heatmap } from "./Heatmap";
-import { getDataForHeatmap, handleChangeModalStatus } from "../utils";
-import { HTTP_GENERAL_ERROR_MSG } from "../constants";
-import { toast } from 'sonner'
 import { deleteRemoteHabit } from "../services/habitsService";
-import HabitModal from "./HabitModal";
+import { getDataForHeatmap, handleChangeModalStatus } from "../utils";
+import { Habit } from "../types";
+import { Heatmap } from "./Heatmap";
+import { HTTP_GENERAL_ERROR_MSG } from "../constants";
 import { removeHabit } from "../slices/habitsSlice";
+import { RootState } from "../store";
+import { toast } from 'sonner'
+import { useSelector, useDispatch } from "react-redux";
+import HabitModal from "./HabitModal";
 
 const MODAL_ID = 'HabitModal'
 
@@ -59,13 +59,12 @@ export default function HabitDetailsModal({ modalId = MODAL_ID, modalTrigger = d
         <>
             {modalTrigger && React.cloneElement(modalTrigger, { onClick: handleOpenModal })}
             <dialog id={modalId} className="modal">
-                <div className="modal-box">
+                <div className="modal-box overflow-x-hidden">
                     <h3 className="font-bold text-lg">{selectedHabit.name}</h3>
                     <div className="overflow-x-auto">
                         <Heatmap color={selectedHabit.color} maxValue={selectedHabit.maxRepetitions} data={getDataForHeatmap(selectedHabit.records ?? [])} width={500} height={150} />
                     </div>
-                    <button className="btn btn-secondary">Completar (TODO)</button>
-                    <div className="flex items center justify-end space-x-4">
+                    <div className="flex items center justify-end space-x-4 mt-3">
                         <button onClick={() => {
                             handleChangeModalStatus(true, `delete_${selectedHabit.id}_habit_modal`)
                         }} className="btn btn-ghost">

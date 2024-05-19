@@ -1,11 +1,11 @@
-import { Info, Settings, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Info, Settings, X } from "lucide-react";
+import { RootState } from "../store";
 import { themeChange } from 'theme-change'
-import HabitModal from "./HabitModal";
-import HabitList from "./HabitList";
 import { Toaster } from "sonner";
 import { useSelector } from "react-redux";
-import { RootState } from "../store";
+import HabitList from "./HabitList";
+import HabitModal from "./HabitModal";
 import SignUpModal from "./SignUpModal";
 
 export default function HomePage() {
@@ -69,7 +69,7 @@ export default function HomePage() {
             </header>
             <main className="py-2 px-4">
                 {(!isLogged && showAccountBanner) && (
-                    <div role="alert" className="alert mb-4">
+                    <div role="alert" className="alert block mb-4">
                         <article>
                             <header className="font-semibold text-md flex justify-between items-center mb-3">
                                 <div className="flex items-center">
@@ -83,7 +83,7 @@ export default function HomePage() {
                             <main>
                                 <p>Si no tienes una cuenta tus datos se guardarán pero solo estarán disponibles en este dispositivo.</p>
                                 <p>Al crear una cuenta <b>tus datos se traspasarán para que no los pierdas</b> y puedas acceder a ellos en cualquier momento.</p>
-                                <div className="flex items-center justify-end space-x-4">
+                                <div className="flex items-center justify-end space-x-4 mt-4">
                                     <button className="btn btn-outline btn-primary">
                                         Iniciar sesión
                                     </button>
