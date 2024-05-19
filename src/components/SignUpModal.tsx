@@ -3,8 +3,10 @@ import { login } from "../slices/userSlice";
 import { RootState } from "../store";
 import { signUp } from "../services/usersService";
 import { useSelector, useDispatch } from "react-redux";
+import { toast } from "sonner";
+import { HTTP_GENERAL_ERROR_MSG } from "../constants";
 
-const MODAL_ID = 'signInModal'
+const MODAL_ID = 'signUpModal'
 
 interface Props {
     readonly modalTrigger: JSX.Element;
@@ -46,7 +48,7 @@ export default function SignUpModal({ modalTrigger }: Props) {
     const resetFields = () => {
         setEmail('')
         setPassword('')
-        setPasswordError('')
+        setPasswordRepeat('')
     }
 
     const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -78,7 +80,7 @@ export default function SignUpModal({ modalTrigger }: Props) {
             
 
         } catch (error) {
-            // TODO
+            toast.error(error instanceof Error ? error.message : HTTP_GENERAL_ERROR_MSG)
         }
     }
 

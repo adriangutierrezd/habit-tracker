@@ -40,7 +40,7 @@ export default function HabitList() {
 
     useEffect(() => {
         fetchHabits()
-    }, [])
+    }, [isLogged, token])
 
     useEffect(() => {
         setHabits(initialHabits)

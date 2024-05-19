@@ -45,10 +45,14 @@ export const habitSlice = createSlice({
         newHabits[habitIndex] = payload.habit
         state.habits = newHabits
         window.localStorage.setItem('userHabits', JSON.stringify(state))
+    },
+    destroyHabits: (state) => {
+      state.habits = []
+      window.localStorage.setItem('userHabits', JSON.stringify(state))
     }
   },
 });
 
 
-export const { addHabit, removeHabit, updateHabit, refreshHabits } = habitSlice.actions;
+export const { addHabit, removeHabit, updateHabit, refreshHabits, destroyHabits } = habitSlice.actions;
 export default habitSlice.reducer;
