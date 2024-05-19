@@ -1,4 +1,4 @@
-import React, { MouseEvent } from "react";
+import React, { MouseEvent, useEffect, useRef } from "react";
 import { Calendar, CirclePlus, Pencil, Trash } from "lucide-react";
 import { deleteRemoteHabit } from "../services/habitsService";
 import { getDataForHeatmap, handleChangeModalStatus } from "../utils";
@@ -10,6 +10,7 @@ import { RootState } from "../store";
 import { toast } from 'sonner'
 import { useSelector, useDispatch } from "react-redux";
 import HabitModal from "./HabitModal";
+import CalendarModal from "./CalendarModal";
 
 const MODAL_ID = 'HabitModal'
 
@@ -26,6 +27,7 @@ interface Props {
 export default function HabitDetailsModal({ modalId = MODAL_ID, modalTrigger = defaultTrigger, selectedHabit }: Props) {
 
     const dispatch = useDispatch()
+    const scrollRef = useRef<HTMLDivElement>(null);
     const { isLogged, token } = useSelector((state: RootState) => {
         return state.userSession
     });
@@ -55,28 +57,37 @@ export default function HabitDetailsModal({ modalId = MODAL_ID, modalTrigger = d
         }
     }
 
+    useEffect(() => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
+      }
+    }, []);
+  
+
     return (
         <>
             {modalTrigger && React.cloneElement(modalTrigger, { onClick: handleOpenModal })}
             <dialog id={modalId} className="modal">
                 <div className="modal-box overflow-x-hidden">
                     <h3 className="font-bold text-lg">{selectedHabit.name}</h3>
-                    <div className="overflow-x-auto">
-                        <Heatmap color={selectedHabit.color} maxValue={selectedHabit.maxRepetitions} data={getDataForHeatmap(selectedHabit.records ?? [])} width={500} height={150} />
+                    <div className="overflow-x-auto" ref={scrollRef}>
+                        <Heatmap color={selectedHabit.color} maxValue={selectedHabit.maxRepetitions} data={getDataForHeatmap(selectedHabit.records ?? [])} width={750} height={130}  />
                     </div>
                     <div className="flex items center justify-end space-x-4 mt-3">
-                        <button onClick={() => {
+                        <button type="button" onClick={() => {
                             handleChangeModalStatus(true, `delete_${selectedHabit.id}_habit_modal`)
-                        }} className="btn btn-ghost">
+                        }} className="btn btn-ghost" autoFocus={false}>
                             <Trash className="h-4 w-4" />
                         </button>
-                        <button className="btn btn-ghost">
-                            <Calendar className="h-4 w-4" />
-                        </button>
-                        <HabitModal selectedHabit={selectedHabit} modalTrigger={<button className="btn modal-trigger btn-ghost">
+                        <CalendarModal habit={selectedHabit} modalId={`calendar_modal_${selectedHabit.id}`} modalTrigger={
+                            <button type="button" className="modal-trigger btn btn-ghost">
+                                <Calendar className="modal-trigger h-4 w-4" />
+                            </button>
+                        } />
+                        <HabitModal selectedHabit={selectedHabit} modalTrigger={<button type="button" className="btn modal-trigger btn-ghost">
                             <Pencil className="h-4 w-4 modal-trigger" />
-                        </button>} 
-                        modalId={`modal_edit_${selectedHabit.id}`} />
+                        </button>}
+                            modalId={`modal_edit_${selectedHabit.id}`} />
                     </div>
                 </div>
                 <form method="dialog" className="modal-backdrop">

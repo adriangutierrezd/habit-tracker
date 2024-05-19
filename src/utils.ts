@@ -1,5 +1,5 @@
 import moment from "moment";
-import { HabitRecord, HeatmapData } from "./types";
+import { Habit, HabitRecord, HeatmapData } from "./types";
 import { v4 as uuidv4 } from 'uuid';
 
 export const getHeaders = (token: string | null): Headers => {
@@ -53,6 +53,32 @@ export const hexToRgba = (hex: string, alpha: number) => {
     "X",
     "Y",
     "Z",
+    "A1",
+    "B1",
+    "C1",
+    "D1",
+    "E1",
+    "F1",
+    "G1",
+    "H1",
+    "I1",
+    "J1",
+    "K1",
+    "L1",
+    "M1",
+    "N1",
+    "O1",
+    "P1",
+    "Q1",
+    "R1",
+    "S1",
+    "T1",
+    "U1",
+    "V1",
+    "W1",
+    "X1",
+    "Y1",
+    "Z1",
   ];
 
   export const getDataForHeatmap = (records: HabitRecord[]) => {
@@ -75,7 +101,6 @@ export const hexToRgba = (hex: string, alpha: number) => {
           });
         }
       }
-
       return data
   }
 
@@ -102,4 +127,9 @@ export const generatePastRecords = (initialDate: string, habitId: string) => {
     })
   }
   return records.reverse()
+}
+
+export const isHabitCompleted = (habit: Habit, date: string) => {
+  if (!habit.records) return false
+  return habit.records.find((record: HabitRecord) => record.date === date)?.repetitions === habit.maxRepetitions
 }

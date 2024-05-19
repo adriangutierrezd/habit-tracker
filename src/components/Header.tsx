@@ -25,7 +25,7 @@ export default function Header() {
     }, [])
 
     return (
-        <header className="flex items-center justify-between py-2 px-4 my-6">
+        <header className="w-full flex items-center justify-between py-2 px-4 my-6 max-w-2xl">
             <div className="flex flex-1 items-center justify-start space-x-3">
                 <div className="drawer w-auto z-20">
                     <input id="settings-drawer" type="checkbox" className="drawer-toggle" />

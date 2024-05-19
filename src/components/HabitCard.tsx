@@ -1,19 +1,14 @@
 import { addLocaleRepetitionToHabit, addRemoteRepetitionToHabit, resetLocalHabitRepetitions, resetRemoteRepetitionToHabit } from "../services/habitRecordService";
 import { Check, HeartPulse, Plus } from "lucide-react"
-import { getDataForHeatmap } from "../utils";
-import { Habit, HabitRecord } from "../types";
+import { getDataForHeatmap, isHabitCompleted } from "../utils";
+import { Habit } from "../types";
 import { Heatmap } from "./Heatmap";
 import { RootState } from "../store";
 import { updateHabit } from "../slices/habitsSlice";
 import { useSelector, useDispatch } from "react-redux";
 import HabitDetailsModal from "./HabitDetailsModal";
 import moment from "moment";
-
-const isHabitCompleted = (habit: Habit, date: string) => {
-    if (!habit.records) return false
-    return habit.records.find((record: HabitRecord) => record.date === date)?.repetitions === habit.maxRepetitions
-}
-
+import { useEffect, useRef } from "react";
 
 interface Props {
     readonly habit: Habit;
@@ -27,11 +22,17 @@ interface HandleStoreRecordProps {
 export default function HabitCard({habit}: Props) {
 
     const dispatch = useDispatch()
+    const scrollRef = useRef<HTMLDivElement>(null);
     const { isLogged, token } = useSelector((state: RootState) => {
         return state.userSession
     });
 
-
+    useEffect(() => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
+        }
+      }, []);
+    
     const handleStoreRecord = async ({ date, habit, action = 'ADD' }: HandleStoreRecordProps) => {
 
         if(!isLogged && action === 'ADD'){
@@ -61,8 +62,8 @@ export default function HabitCard({habit}: Props) {
                 </div>
                 <HabitButton habit={habit} handleStoreRecord={handleStoreRecord} />
             </div>
-            <div className="overflow-x-auto">
-                <Heatmap color={habit.color} maxValue={habit.maxRepetitions} data={getDataForHeatmap(habit.records ?? [])} width={500} height={150} />
+            <div className="overflow-x-auto" ref={scrollRef}>
+                <Heatmap color={habit.color} maxValue={habit.maxRepetitions} data={getDataForHeatmap(habit.records ?? [])} width={750} height={130} />
             </div>
         </div>
     </div>

@@ -7,7 +7,7 @@ export default function HomePage() {
     return (
         <>
             <Header />
-            <main className="py-2 px-4">
+            <main className="py-2 px-4 max-w-2xl">
                 <AccountBanner />
                 <HabitList />
                 <Toaster richColors={true} className="z-100" />

@@ -19,7 +19,6 @@ export type InteractionData = {
 };
 
 export const Heatmap = ({ width, height, data, color, maxValue }: HeatmapProps) => {
-  const [hoveredCell, setHoveredCell] = useState<InteractionData | null>(null);
 
   return (
     <div style={{ position: "relative" }}>
@@ -29,9 +28,7 @@ export const Heatmap = ({ width, height, data, color, maxValue }: HeatmapProps) 
         data={data}
         color={color}
         maxValue={maxValue}
-        setHoveredCell={setHoveredCell}
       />
-      <Tooltip interactionData={hoveredCell} width={width} height={height} />
     </div>
   );
 };

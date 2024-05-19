@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import * as d3 from "d3";
-import { InteractionData } from "./Heatmap";
 import { hexToRgba } from "../utils";
 
 const MARGIN = { top: 10, right: 50, bottom: 30, left: 50 };
@@ -9,7 +8,6 @@ type RendererProps = {
   width: number;
   height: number;
   data: { x: string; y: string; value: number }[];
-  setHoveredCell: (hoveredCell: InteractionData | null) => void;
   maxValue: number;
   color: string;
 };
@@ -20,7 +18,6 @@ export const Renderer = ({
   data,
   maxValue,
   color,
-  setHoveredCell,
 }: RendererProps) => {
   // The bounds (=area inside the axis) is calculated by substracting the margins
   const boundsWidth = width - MARGIN.right - MARGIN.left;
@@ -76,60 +73,8 @@ export const Renderer = ({
         fill={getColor(d.value)}
         rx={5}
         stroke={""}
-        onMouseEnter={(e) => {
-          setHoveredCell({
-            xLabel: "group " + d.x,
-            yLabel: "group " + d.y,
-            xPos: x + xScale.bandwidth() + MARGIN.left,
-            yPos: y + xScale.bandwidth() / 2 + MARGIN.top,
-            value: Math.round(d.value * 100) / 100,
-          });
-        }}
-        onMouseLeave={() => setHoveredCell(null)}
         cursor="pointer"
       />
-    );
-  });
-
-  const xLabels = allXGroups.map((name, i) => {
-    const x = xScale(name);
-
-    if (!x) {
-      return null;
-    }
-
-    return (
-      <text
-        key={i}
-        x={x + xScale.bandwidth() / 2}
-        y={boundsHeight + 10}
-        textAnchor="middle"
-        dominantBaseline="middle"
-        fontSize={10}
-      >
-        {name}
-      </text>
-    );
-  });
-
-  const yLabels = allYGroups.map((name, i) => {
-    const y = yScale(name);
-
-    if (!y) {
-      return null;
-    }
-
-    return (
-      <text
-        key={i}
-        x={-5}
-        y={y + yScale.bandwidth() / 2}
-        textAnchor="end"
-        dominantBaseline="middle"
-        fontSize={10}
-      >
-        {name}
-      </text>
     );
   });
 
@@ -141,8 +86,6 @@ export const Renderer = ({
         transform={`translate(${[MARGIN.left, MARGIN.top].join(",")})`}
       >
         {allShapes}
-        {xLabels}
-        {yLabels}
       </g>
     </svg>
   );
