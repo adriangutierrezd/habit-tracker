@@ -26,7 +26,6 @@ export const Renderer = ({
   const allYGroups = useMemo(() => [...new Set(data.map((d) => d.y))], [data]);
   const allXGroups = useMemo(() => [...new Set(data.map((d) => d.x))], [data]);
 
-  const [min = 0, max = 0] = d3.extent(data.map((d) => d.value)); // extent can return [undefined, undefined], default to [0,0] to fix types
 
   const xScale = useMemo(() => {
     return d3

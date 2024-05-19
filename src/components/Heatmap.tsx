@@ -1,6 +1,4 @@
-import { useState } from "react";
 import { Renderer } from "./Renderer";
-import { Tooltip } from "./Tooltip";
 
 type HeatmapProps = {
   width: number;
