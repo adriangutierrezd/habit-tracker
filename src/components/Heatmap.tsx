@@ -19,14 +19,12 @@ export type InteractionData = {
 export const Heatmap = ({ width, height, data, color, maxValue }: HeatmapProps) => {
 
   return (
-    <div style={{ position: "relative" }}>
-      <Renderer
-        width={width}
-        height={height}
-        data={data}
-        color={color}
-        maxValue={maxValue}
-      />
-    </div>
+    <Renderer
+      width={width}
+      height={height}
+      data={data}
+      color={color}
+      maxValue={maxValue}
+    />
   );
 };

@@ -8,7 +8,7 @@ import { updateHabit } from "../slices/habitsSlice";
 import { useSelector, useDispatch } from "react-redux";
 import HabitDetailsModal from "./HabitDetailsModal";
 import moment from "moment";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface Props {
     readonly habit: Habit;
@@ -23,6 +23,7 @@ export default function HabitCard({habit}: Props) {
 
     const dispatch = useDispatch()
     const scrollRef = useRef<HTMLDivElement>(null);
+    const [containerWidth, setContainerWidth] = useState<number>(0)
     const { isLogged, token } = useSelector((state: RootState) => {
         return state.userSession
     });
@@ -30,6 +31,12 @@ export default function HabitCard({habit}: Props) {
     useEffect(() => {
         if (scrollRef.current) {
           scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
+          const root = document.querySelector('#root')
+          if(root){
+            setContainerWidth(root.clientWidth - 100)
+          }else{
+            setContainerWidth(0)
+          }
         }
       }, []);
     
@@ -51,7 +58,7 @@ export default function HabitCard({habit}: Props) {
     }
 
     const trigger = <div
-        className="card w-full bg-base-100 shadow-xl my-3 cursor-pointer">
+        className="card max-w-full bg-base-100 shadow-xl my-3 cursor-pointer">
         <div className="card-body modal-trigger">
             <div className="flex items-center justify-between modal-trigger">
                 <div className="flex items-center space-x-3">
@@ -62,8 +69,8 @@ export default function HabitCard({habit}: Props) {
                 </div>
                 <HabitButton habit={habit} handleStoreRecord={handleStoreRecord} />
             </div>
-            <div className="overflow-x-auto" ref={scrollRef}>
-                <Heatmap color={habit.color} maxValue={habit.maxRepetitions} data={getDataForHeatmap(habit.records ?? [])} width={750} height={130} />
+            <div className="overflow-x-auto" style={{maxWidth: containerWidth}} ref={scrollRef}>
+                <Heatmap color={habit.color} maxValue={habit.maxRepetitions} data={getDataForHeatmap(habit.records ?? [])} width={900} height={155} /> 
             </div>
         </div>
     </div>
