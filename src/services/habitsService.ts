@@ -1,4 +1,3 @@
-import { HabitFrequencies } from '../types';
 import { HTTP_CREATED_CODE, HTTP_GENERAL_ERROR_MSG, HTTP_OK_CODE } from '../constants';
 import { getHeaders } from '../utils';
 
@@ -7,7 +6,6 @@ interface StoringProps {
     description: string | null,
     color: string,
     maxRepetitions: number,
-    frequency: HabitFrequencies,
     token: string | undefined
 }
 
@@ -17,16 +15,15 @@ interface UpdatingProps {
     description: string | null,
     color: string,
     maxRepetitions: number,
-    frequency: HabitFrequencies,
     token: string | undefined
 }
 
-export const storeRemoteHabit = async({name, description, color, maxRepetitions, frequency, token}: StoringProps) => {
+export const storeRemoteHabit = async({name, description, color, maxRepetitions, token}: StoringProps) => {
     try{
 
         const myHeaders = getHeaders(token ?? null)
 
-        const raw = JSON.stringify({ name, description, color, maxRepetitions, frequency });
+        const raw = JSON.stringify({ name, description, color, maxRepetitions });
     
         const requestOptions: RequestInit = {
             method: 'POST',
@@ -45,12 +42,12 @@ export const storeRemoteHabit = async({name, description, color, maxRepetitions,
     }
 }
 
-export const updateRemoteHabit = async({name, description, color, maxRepetitions, frequency, token, id}: UpdatingProps) => {
+export const updateRemoteHabit = async({name, description, color, maxRepetitions, token, id}: UpdatingProps) => {
     try{
 
         const myHeaders = getHeaders(token ?? null)
 
-        const raw = JSON.stringify({ name, description, color, maxRepetitions, frequency });
+        const raw = JSON.stringify({ name, description, color, maxRepetitions });
     
         const requestOptions: RequestInit = {
             method: 'PUT',

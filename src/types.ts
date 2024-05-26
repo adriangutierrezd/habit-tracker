@@ -4,7 +4,6 @@ export interface UserData {
     email: string;
 }
 
-export type HabitFrequencies = 'DAY' | 'WEEK' | 'MONTH' | 'FORTNIGHT';
 
 export interface UserSession {
     token: string | null;
@@ -29,7 +28,6 @@ export interface Habit {
     name: string;
     description: string | null;
     color: string;
-    frequency: HabitFrequencies;
     maxRepetitions: number;
     records?: HabitRecord[];
 }

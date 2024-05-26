@@ -1,7 +1,7 @@
 import React, { MouseEvent, useState } from "react";
 import { addHabit, updateHabit } from "../slices/habitsSlice";
-import { AVAILABLE_COLORS, HABIT_FREQUENCY, HTTP_GENERAL_ERROR_MSG } from "../constants";
-import { BasicOption, Habit, HabitFrequencies } from "../types";
+import { AVAILABLE_COLORS, HTTP_GENERAL_ERROR_MSG } from "../constants";
+import { Habit } from "../types";
 import { CirclePlus, Minus, Plus } from "lucide-react";
 import { generatePastRecords } from "../utils";
 import { RootState } from "../store";
@@ -28,14 +28,12 @@ export default function HabitModal({ modalId = MODAL_ID, modalTrigger = defaultT
     const dispatch = useDispatch()
     const [habitName, setHabitName] = useState<string>('')
     const [habitDescription, setHabitDescription] = useState<string>('')
-    const [habitFrequency, setHabitFrequency] = useState<HabitFrequencies>('DAY')
     const [habitColor, setHabitColor] = useState<string>('')
     const [habitMaxReps, setHabitMaxReps] = useState<number>(1)
     const [habitNameError, setHabitNameError] = useState<string>()
     const [habitDescriptionError, setHabitDescriptionError] = useState<string>()
     const [habitColorError, setHabitColorError] = useState<string>()
     const [habitMaxRepsError, setHabitMaxRepsError] = useState<string>()
-    const [habitFrequencyError, setHabitFrequencyError] = useState<string>('')
     const { isLogged, token } = useSelector((state: RootState) => {
         return state.userSession
     });
@@ -71,20 +69,17 @@ export default function HabitModal({ modalId = MODAL_ID, modalTrigger = defaultT
         setHabitDescriptionError('')
         setHabitColorError('')
         setHabitMaxRepsError('')
-        setHabitFrequencyError('')
     }
 
     const resetFields = () => {
         if (selectedHabit) {
             setHabitName(selectedHabit.name)
             setHabitDescription(selectedHabit.description ?? '')
-            setHabitFrequency(selectedHabit.frequency)
             setHabitColor(selectedHabit.color)
             setHabitMaxReps(selectedHabit.maxRepetitions)
         } else {
             setHabitName('')
             setHabitDescription('')
-            setHabitFrequency('DAY')
             setHabitColor('')
             setHabitMaxReps(1)
         }
@@ -112,11 +107,6 @@ export default function HabitModal({ modalId = MODAL_ID, modalTrigger = defaultT
             setHabitColorError('El color es obligatorio')
         }
 
-        if (!habitFrequency) {
-            hasErrors = true
-            setHabitFrequencyError('Debes seleccionar una periodicidad')
-        }
-
         if (!habitMaxReps || habitMaxReps < 1 || habitMaxReps > 65535) {
             hasErrors = true
             setHabitMaxRepsError('El número de repeticiones debe ser superior a 1')
@@ -139,7 +129,6 @@ export default function HabitModal({ modalId = MODAL_ID, modalTrigger = defaultT
                     description: habitDescription,
                     color: habitColor,
                     maxRepetitions: habitMaxReps,
-                    frequency: habitFrequency ?? 'DAY',
                     token: token ?? undefined,
                     id: selectedHabit.id
                 })
@@ -156,7 +145,6 @@ export default function HabitModal({ modalId = MODAL_ID, modalTrigger = defaultT
                     description: habitDescription,
                     color: habitColor,
                     maxRepetitions: habitMaxReps,
-                    frequency: habitFrequency ?? 'DAY',
                     token: token ?? undefined
                 })
 
@@ -173,7 +161,6 @@ export default function HabitModal({ modalId = MODAL_ID, modalTrigger = defaultT
                     description: habitDescription,
                     color: habitColor,
                     maxRepetitions: habitMaxReps,
-                    frequency: habitFrequency ?? 'DAY',
                 }
 
 
@@ -189,7 +176,6 @@ export default function HabitModal({ modalId = MODAL_ID, modalTrigger = defaultT
                     description: habitDescription,
                     color: habitColor,
                     maxRepetitions: habitMaxReps,
-                    frequency: habitFrequency ?? 'DAY',
                     records: generatePastRecords(moment().format('YYYY-MM-DD'), newHabitId)
                 }
                 dispatch(addHabit(newHabit))
@@ -226,17 +212,6 @@ export default function HabitModal({ modalId = MODAL_ID, modalTrigger = defaultT
                         }} className="textarea textarea-bordered w-full" placeholder="Descripción"></textarea>
                         <span className="text-sm text-red-500">{habitDescriptionError}</span>
 
-                        <select className="select select-bordered w-full" onChange={(event) => {
-                            setHabitFrequency(event.target.value as HabitFrequencies)
-                        }}>
-                            {HABIT_FREQUENCY.map((habitFrequency: BasicOption) => {
-                                return <option key={habitFrequency.value} value={habitFrequency.value}>
-                                    {habitFrequency.label}
-                                </option>
-                            })}
-                        </select>
-                        <span className="text-sm text-red-500">{habitFrequencyError}</span>
-
                         <label htmlFor="color" className="block">Selecciona un color:</label>
                         <div className="flex items-center justify-start space-x-2 space-y-2 flex-wrap">
                             {AVAILABLE_COLORS.map((color) => {
@@ -248,7 +223,7 @@ export default function HabitModal({ modalId = MODAL_ID, modalTrigger = defaultT
                         <span className="text-sm text-red-500">{habitColorError}</span>
 
 
-                        <label htmlFor="maxReps" className="block">Máximas veces completado {habitFrequency && <span className="lowercase">por {HABIT_FREQUENCY.find((habit) => habit.value === habitFrequency)?.label}</span>}</label>
+                        <label htmlFor="maxReps" className="block">Máximas veces completado</label>
                         <div className="flex flex-col sm:flex-row items-center space-x-2 space-y-2">
                             <input disabled={true} type="number" step="1" min="1" value={habitMaxReps} name="maxReps" className="input input-bordered w-full sm:flex-1" />
                             <div className="flex items-center justify-end space-x-2 w-full mt-0 sm:w-auto">

@@ -1,5 +1,5 @@
 import { addLocaleRepetitionToHabit, addRemoteRepetitionToHabit, resetLocalHabitRepetitions, resetRemoteRepetitionToHabit } from "../services/habitRecordService";
-import { Check, HeartPulse, Plus } from "lucide-react"
+import { Check, Plus } from "lucide-react"
 import { getDataForHeatmap, isHabitCompleted } from "../utils";
 import { Habit } from "../types";
 import { Heatmap } from "./Heatmap";
@@ -62,9 +62,6 @@ export default function HabitCard({habit}: Props) {
         <div className="card-body modal-trigger">
             <div className="flex items-center justify-between modal-trigger">
                 <div className="flex items-center space-x-3">
-                    <div className="p-2" style={{ backgroundColor: habit.color }}>
-                        <HeartPulse className="h-4 w-4 text-white" />
-                    </div>
                     <h2 className="card-title text-base sm:text-lg">{habit.name}</h2>
                 </div>
                 <HabitButton habit={habit} handleStoreRecord={handleStoreRecord} />
