@@ -43,7 +43,6 @@ export default function AccountBanner() {
                         </header>
                         <main>
                             <p>Si no tienes una cuenta tus datos se guardarán pero solo estarán disponibles en este dispositivo.</p>
-                            <p>Al crear una cuenta <b>tus datos se traspasarán para que no los pierdas</b> y puedas acceder a ellos en cualquier momento.</p>
                             <div className="flex items-center justify-end space-x-4 mt-4">
                                 <SignInModal modalTrigger={
                                     <button className="btn btn-outline btn-primary">
