@@ -1,7 +1,7 @@
-import { addLocaleRepetitionToHabit, addRemoteRepetitionToHabit, resetLocalHabitRepetitions, resetRemoteRepetitionToHabit } from "../services/habitRecordService";
+import { addLocaleRepetitionToHabit, addRemoteRepetitionToHabit, resetLocalHabitRepetitions, resetRemoteRepetitionToHabit, setLocaleHabitRepetitions } from "../services/habitRecordService";
 import { Check, Plus } from "lucide-react"
 import { getDataForHeatmap, isHabitCompleted } from "../utils";
-import { Habit } from "../types";
+import { Habit, HabitRecord } from "../types";
 import { Heatmap } from "./Heatmap";
 import { RootState } from "../store";
 import { updateHabit } from "../slices/habitsSlice";
@@ -9,6 +9,8 @@ import { useSelector, useDispatch } from "react-redux";
 import HabitDetailsModal from "./HabitDetailsModal";
 import moment from "moment";
 import { useEffect, useRef, useState } from "react";
+import { HTTP_GENERAL_ERROR_MSG } from "../constants";
+import { toast } from "sonner";
 
 interface Props {
     readonly habit: Habit;
@@ -40,20 +42,29 @@ export default function HabitCard({habit}: Props) {
         }
       }, []);
     
-    const handleStoreRecord = async ({ date, habit, action = 'ADD' }: HandleStoreRecordProps) => {
-
-        if(!isLogged && action === 'ADD'){
-            const response = addLocaleRepetitionToHabit({habit, date})
-            dispatch(updateHabit({ habit: response, id: response.id }))
-        }else if(!isLogged && action === 'RESET'){
-            const response = resetLocalHabitRepetitions({habit, date})
-            dispatch(updateHabit({ habit: response, id: response.id }))
-        } else if(isLogged && action === 'ADD'){
-            const response = await addRemoteRepetitionToHabit({ token, habit, date })
-            dispatch(updateHabit({ habit: response.data, id: response.data.id }))
-        }else if(isLogged && action === 'RESET'){
-            const response = await resetRemoteRepetitionToHabit({ token, habit, date })
-            dispatch(updateHabit({ habit: response.data, id: response.data.id }))
+    const handleStoreRecord = ({ date, habit, action = 'ADD' }: HandleStoreRecordProps) => {
+        let previousReps: number = 0
+        try{
+            const records = structuredClone(habit.records ?? [])
+            const findRecordIndex = records.findIndex((record: HabitRecord) => record.date === date)
+            previousReps = findRecordIndex === -1 ? 0 : records[findRecordIndex].repetitions
+            if(action === 'ADD'){
+                const response = addLocaleRepetitionToHabit({habit, date})
+                dispatch(updateHabit({ habit: response, id: response.id }))
+                if(isLogged){
+                    addRemoteRepetitionToHabit({ token, habit, date })
+                }
+            }else if(action === 'RESET'){
+                const response = resetLocalHabitRepetitions({habit, date})
+                dispatch(updateHabit({ habit: response, id: response.id }))
+                if(isLogged){
+                    resetRemoteRepetitionToHabit({ token, habit, date })
+                }
+            }
+        }catch(error){
+            const response = setLocaleHabitRepetitions({habit, date, repetitions: previousReps})
+            dispatch(updateHabit({ habit: response, id: response?.id }))
+            toast.error(error instanceof Error ? error.message : HTTP_GENERAL_ERROR_MSG)
         }
     }
 

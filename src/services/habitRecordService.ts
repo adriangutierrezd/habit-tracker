@@ -115,3 +115,23 @@ export const resetRemoteRepetitionToHabit = async ({ token, habit, date }: { tok
         throw new Error(error instanceof Error ? error.message : HTTP_GENERAL_ERROR_MSG)
     }
 }
+
+export const setLocaleHabitRepetitions = ({ habit, date, repetitions }: { habit: Habit, date: string, repetitions: number }) => {
+    const records = structuredClone(habit.records ?? [])
+    const findRecordIndex = records.findIndex((record: HabitRecord) => record.date === date)
+    if(findRecordIndex === -1){
+        return
+    }
+
+    const updatedRecord = {
+        ...records[findRecordIndex],
+        repetitions
+    }
+
+    records[findRecordIndex] = updatedRecord
+    return {
+        ...habit, 
+        records
+    }
+
+}
